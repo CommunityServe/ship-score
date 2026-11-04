@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test harness/test/
+      - run: node --test harness/test/harness.test.mjs
       - run: node harness/validate.mjs
       - run: node site/build.mjs
       - if: github.event_name == 'pull_request'

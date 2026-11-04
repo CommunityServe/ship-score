@@ -1,4 +1,4 @@
-// node --test harness/test: the parsers, the score and the validator on a synthetic submission built in a temp dir.
+// node --test harness/test/harness.test.mjs: the parsers, the score and the validator on a synthetic submission built in a temp dir.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

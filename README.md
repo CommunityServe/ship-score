@@ -82,6 +82,6 @@ rebuilds. Anyone can play a submitted game and challenge a verdict in an issue.
 | `harness/score.mjs`, `validate.mjs` | The score and the CI checks, both from raw files |
 | `site/build.mjs` | The GitHub Pages leaderboard |
 
-Tests: `node --test harness/test/`. Adding an agent harness is one `parsers` entry in `harness/sessions.mjs` with a test.
+Tests: `node --test harness/test/harness.test.mjs`. Adding an agent harness is one `parsers` entry in `harness/sessions.mjs` with a test.
 
 MIT licensed: the harness, the prompts and every submitted result.
