@@ -1,0 +1,43 @@
+{
+  "prompt": "subway-fps",
+  "version": "v1",
+  "difficulty": 4,
+  "sha256": "21e55f7228837b61a4f1df2569ebb204ba579a255c8b9554f136074d51eafbe6",
+  "items": [
+    {
+      "id": "walk",
+      "points": 2,
+      "text": "Walk and look around in first person on a platform with tracks"
+    },
+    {
+      "id": "enemies",
+      "points": 2,
+      "text": "Enemies come at you and fall when shot"
+    },
+    {
+      "id": "weapons",
+      "points": 1,
+      "text": "Two or more weapons to switch between"
+    },
+    {
+      "id": "tracers",
+      "points": 1,
+      "text": "Tracers and a muzzle flash when you fire"
+    },
+    {
+      "id": "sound",
+      "points": 1,
+      "text": "A sound when you fire"
+    },
+    {
+      "id": "train",
+      "points": 2,
+      "text": "After wave 1 a train arrives, and riding it takes you to another station"
+    },
+    {
+      "id": "wave-2",
+      "points": 1,
+      "text": "Wave 2 has more enemies than wave 1"
+    }
+  ]
+}

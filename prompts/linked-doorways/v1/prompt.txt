@@ -1,0 +1,20 @@
+Build a first-person puzzle game for the browser with three.js, built around linked doorways.
+
+The doorways: each one shows a live view of the place it leads to, rendered from the matching viewpoint and clipped to its frame, including doorways seen through other doorways at least two levels deep. Walking through one is seamless: no flash and no jump in the view. The player and objects keep their momentum through a doorway, and a cube halfway through is drawn on both sides.
+
+The game: five puzzle rooms with a level select, solved by placing doorways on walls, carrying cubes onto pressure plates and launching yourself through doorways at speed. Physics for the player and the cubes (gravity, collision, friction, stacking) written for this game, no physics library. Progress is saved between sessions, and each room ends with a level-complete screen.
+
+Must have (checked by playing the game):
+- Walk and look around in first person
+- A doorway shows the room it leads to
+- Walking through a doorway puts you in that room with no fade or loading
+- A doorway seen through a doorway also shows its room
+- A cube on a pressure plate opens something
+- A level select with five rooms
+- After a reload, a solved room stays solved
+
+Setup and rules:
+- Use Vite and the latest three.js from npm, plain JavaScript modules.
+- Write tools/shot.mjs with Playwright (Chromium) that loads the built game, waits for it to render and saves three screenshots to shots/. Look at the screenshots yourself and fix whatever looks wrong.
+- `npm run build` must pass. Write README.md (what it is, controls) and DONE.md (what you built, what you checked, what you would improve next).
+- Work autonomously to the end; do not stop to ask questions. If something fails, fix it and keep going.

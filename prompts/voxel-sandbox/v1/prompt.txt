@@ -1,0 +1,20 @@
+Build a first-person voxel sandbox game for the browser with three.js, in the current directory.
+
+The world: a procedurally generated block terrain (grass, dirt, stone, sand, water, wood logs, leaves, with hills and trees), chunked and meshed with only the visible faces, a sky, fog and simple directional lighting. The player walks, jumps and collides with the blocks, breaks blocks (left click) and places the selected block (right click), and picks a block type from a hotbar (keys 1-9, shown at the bottom of the screen). Draw the block textures yourself in code (canvas-generated pixel textures, one texture atlas); no downloaded art.
+
+Must have (checked by playing the game):
+- Walk with WASD and look around with the mouse
+- Left click removes a block
+- Right click adds a block
+- Keys 1-9 change the highlighted hotbar slot
+- Space jumps
+- Water is visible
+- Trees are visible
+- The ground has hills
+
+Setup and rules:
+- Use Vite and the latest three.js from npm, plain JavaScript modules.
+- Controls: WASD to move, mouse to look (pointer lock on click), space to jump, left click break, right click place, 1-9 hotbar, with an on-screen controls hint and a crosshair.
+- Write tools/shot.mjs with Playwright (Chromium) that loads the built game, waits for the world to render and saves screenshots to shots/ (the spawn view and two other views). Look at the screenshots yourself and fix whatever looks wrong.
+- `npm run build` must pass. Write README.md (what it is, controls) and DONE.md (what you built, what you checked, what you would improve next).
+- Work autonomously to the end; do not stop to ask questions. If something fails, fix it and keep going.

@@ -1,0 +1,23 @@
+Build a space flight game for the browser with three.js: one procedurally generated planet that you fly from its surface to orbit and back, with no loading screen.
+
+The planet: a whole sphere of terrain (mountains, plains, oceans, polar ice) generated from noise, with level of detail that adds triangles near the camera and stays crack-free where detail levels meet, from standing height to a view of the whole globe. An atmosphere shader that scatters light (blue sky by day, red sunsets, a thin glowing rim from space), a sun on a day and night cycle, clouds, and lights on the night side.
+
+The ship: Newtonian flight with thrust, rotation and gravity, atmospheric drag, a glow when re-entering too fast, landing gear and a check for a safe landing. A HUD with altitude, speed, vertical speed and fuel, and a predicted orbit line once you are above the atmosphere.
+
+Keep it smooth: 60 fps on an Apple Silicon Mac, and no jitter far from the origin (handle floating-point precision).
+
+Must have (checked by playing the game):
+- Take off from the ground and fly with the keyboard
+- Fly up until the whole planet is in view, with no loading screen
+- Oceans and mountains are visible
+- Blue sky near the ground, black sky in space
+- Day turns to night
+- A HUD with altitude, speed and fuel
+- An orbit line above the atmosphere
+- Land back on the ground
+
+Setup and rules:
+- Use Vite and the latest three.js from npm, plain JavaScript modules.
+- Write tools/shot.mjs with Playwright (Chromium) that loads the built game, waits for it to render and saves three screenshots to shots/. Look at the screenshots yourself and fix whatever looks wrong.
+- `npm run build` must pass. Write README.md (what it is, controls) and DONE.md (what you built, what you checked, what you would improve next).
+- Work autonomously to the end; do not stop to ask questions. If something fails, fix it and keep going.

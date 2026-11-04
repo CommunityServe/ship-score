@@ -1,0 +1,13 @@
+[
+  { "wait": 8000 }, { "shot": "load" },
+  { "start": true }, { "wait": 1000 }, { "shot": "start" },
+  { "press": "3" }, { "wait": 400 }, { "shot": "key-3" },
+  { "hold": "w", "ms": 1500 }, { "wait": 400 }, { "shot": "walk" },
+  { "hold": "Space", "ms": 200 }, { "wait": 100 }, { "shot": "jump" }, { "wait": 1200 },
+  { "look": [400, 0] }, { "wait": 400 }, { "shot": "look-right" },
+  { "look": [400, 0] }, { "wait": 400 }, { "shot": "look-back" },
+  { "look": [400, 0] }, { "wait": 400 }, { "shot": "look-left" },
+  { "look": [400, 200] }, { "wait": 400 }, { "shot": "look-down" },
+  { "click": "left" }, { "wait": 500 }, { "shot": "left-click" },
+  { "click": "right" }, { "wait": 500 }, { "shot": "right-click" }
+]

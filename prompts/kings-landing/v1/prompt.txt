@@ -1,0 +1,15 @@
+Build me Kings landing from game of thrones in threejs, it starts like the tv show movie intro where kings landing gets built like origami for the first 30 seconds. And it ends with a first person walkable character so you can explore it.
+
+Must have (checked by playing the game):
+- An intro where the city builds itself from folding pieces
+- The intro lasts 20 to 40 seconds
+- After the intro, walk with WASD and look around with the mouse
+- A wall around the city
+- A castle on a hill
+- Water beside the city
+
+Setup and rules:
+- Use Vite and the latest three.js from npm, plain JavaScript modules.
+- Write tools/shot.mjs with Playwright (Chromium) that loads the built game, waits for it to render and saves three screenshots to shots/. Look at the screenshots yourself and fix whatever looks wrong.
+- `npm run build` must pass. Write README.md (what it is, controls) and DONE.md (what you built, what you checked, what you would improve next).
+- Work autonomously to the end; do not stop to ask questions. If something fails, fix it and keep going.

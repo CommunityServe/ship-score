@@ -1,0 +1,38 @@
+{
+  "prompt": "kings-landing",
+  "version": "v1",
+  "difficulty": 3,
+  "sha256": "ab1695363468142cb9ec986ea13e3b0da294fe8cb17a07581c8bcd981d56ecad",
+  "items": [
+    {
+      "id": "intro-build",
+      "points": 3,
+      "text": "An intro where the city builds itself from folding pieces"
+    },
+    {
+      "id": "intro-length",
+      "points": 1,
+      "text": "The intro lasts 20 to 40 seconds"
+    },
+    {
+      "id": "walk",
+      "points": 3,
+      "text": "After the intro, walk with WASD and look around with the mouse"
+    },
+    {
+      "id": "wall",
+      "points": 1,
+      "text": "A wall around the city"
+    },
+    {
+      "id": "castle",
+      "points": 1,
+      "text": "A castle on a hill"
+    },
+    {
+      "id": "water",
+      "points": 1,
+      "text": "Water beside the city"
+    }
+  ]
+}

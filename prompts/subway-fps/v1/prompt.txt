@@ -1,0 +1,18 @@
+Make a beautifully detailed web scene using js, of a subway station with focus on detail. It should be 3D and something that would be impressive to you.
+The scene must be the setting for an FPS with humanoid/zombieoid enemies, visible ammo tracers, weapon recoil, at least two different weapons, muzzle flash, sfx and high detail.
+The first wave should be simple. When the first wave is cleared, a train should pull into the station that the player enters. The train then closes its open doors to bring you to the next station for wave 2, with difficulty increasing until the player loses. use threejs and create the result as something playable in the browser.
+
+Must have (checked by playing the game):
+- Walk and look around in first person on a platform with tracks
+- Enemies come at you and fall when shot
+- Two or more weapons to switch between
+- Tracers and a muzzle flash when you fire
+- A sound when you fire
+- After wave 1 a train arrives, and riding it takes you to another station
+- Wave 2 has more enemies than wave 1
+
+Setup and rules:
+- Use Vite and the latest three.js from npm, plain JavaScript modules.
+- Write tools/shot.mjs with Playwright (Chromium) that loads the built game, waits for it to render and saves three screenshots to shots/. Look at the screenshots yourself and fix whatever looks wrong.
+- `npm run build` must pass. Write README.md (what it is, controls) and DONE.md (what you built, what you checked, what you would improve next).
+- Work autonomously to the end; do not stop to ask questions. If something fails, fix it and keep going.

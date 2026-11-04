@@ -1,0 +1,38 @@
+{
+  "prompt": "racing",
+  "version": "v1",
+  "difficulty": 3,
+  "sha256": "5c15eee4d815ea8f32ed9ff9cfd848a9c23b2cf0c4161d901b3c8735be18234d",
+  "items": [
+    {
+      "id": "drive",
+      "points": 3,
+      "text": "Drive a car with the keyboard: accelerate, brake, steer"
+    },
+    {
+      "id": "track",
+      "points": 2,
+      "text": "A track or road to race on"
+    },
+    {
+      "id": "opponents",
+      "points": 2,
+      "text": "Opponent cars or a lap timer"
+    },
+    {
+      "id": "speedometer",
+      "points": 1,
+      "text": "Speed shown on screen"
+    },
+    {
+      "id": "engine-sound",
+      "points": 1,
+      "text": "An engine sound that changes with speed"
+    },
+    {
+      "id": "no-asset-files",
+      "points": 1,
+      "text": "No image or audio files in the project"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "prompt": "linked-doorways",
+  "version": "v1",
+  "difficulty": 5,
+  "sha256": "2d27440b9d8b5e692c540167884b3cb97f5ff02d1649eb9a0e21a0c7db6bda50",
+  "items": [
+    {
+      "id": "walk",
+      "points": 2,
+      "text": "Walk and look around in first person"
+    },
+    {
+      "id": "door-view",
+      "points": 2,
+      "text": "A doorway shows the room it leads to"
+    },
+    {
+      "id": "seamless",
+      "points": 2,
+      "text": "Walking through a doorway puts you in that room with no fade or loading"
+    },
+    {
+      "id": "recursion",
+      "points": 1,
+      "text": "A doorway seen through a doorway also shows its room"
+    },
+    {
+      "id": "plate",
+      "points": 1,
+      "text": "A cube on a pressure plate opens something"
+    },
+    {
+      "id": "level-select",
+      "points": 1,
+      "text": "A level select with five rooms"
+    },
+    {
+      "id": "save",
+      "points": 1,
+      "text": "After a reload, a solved room stays solved"
+    }
+  ]
+}

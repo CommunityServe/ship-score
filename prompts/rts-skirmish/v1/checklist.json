@@ -1,0 +1,48 @@
+{
+  "prompt": "rts-skirmish",
+  "version": "v1",
+  "difficulty": 5,
+  "sha256": "82150aebef6de92ddd876aadb63c5381befc4ef6966cb5f9386673850898c919",
+  "items": [
+    {
+      "id": "select-move",
+      "points": 2,
+      "text": "Drag a box to select units, right click to move them"
+    },
+    {
+      "id": "gather",
+      "points": 2,
+      "text": "Workers gather resources and the counter goes up"
+    },
+    {
+      "id": "barracks",
+      "points": 1,
+      "text": "Build a barracks and train units from it"
+    },
+    {
+      "id": "unit-types",
+      "points": 1,
+      "text": "Three or more unit types"
+    },
+    {
+      "id": "fog",
+      "points": 1,
+      "text": "Fog of war hides the unexplored map"
+    },
+    {
+      "id": "minimap",
+      "points": 1,
+      "text": "A minimap, and clicking it moves the camera"
+    },
+    {
+      "id": "enemy-attacks",
+      "points": 1,
+      "text": "Computer units attack you"
+    },
+    {
+      "id": "end-screen",
+      "points": 1,
+      "text": "A victory or defeat screen"
+    }
+  ]
+}

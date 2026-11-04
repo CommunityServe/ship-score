@@ -1,0 +1,48 @@
+{
+  "prompt": "planet-to-orbit",
+  "version": "v1",
+  "difficulty": 5,
+  "sha256": "5976854022a35b8dbe729e0e17420ab225ddb69efbda6074c107ac54a18473e1",
+  "items": [
+    {
+      "id": "take-off",
+      "points": 2,
+      "text": "Take off from the ground and fly with the keyboard"
+    },
+    {
+      "id": "to-orbit",
+      "points": 2,
+      "text": "Fly up until the whole planet is in view, with no loading screen"
+    },
+    {
+      "id": "terrain",
+      "points": 1,
+      "text": "Oceans and mountains are visible"
+    },
+    {
+      "id": "sky",
+      "points": 1,
+      "text": "Blue sky near the ground, black sky in space"
+    },
+    {
+      "id": "day-night",
+      "points": 1,
+      "text": "Day turns to night"
+    },
+    {
+      "id": "hud",
+      "points": 1,
+      "text": "A HUD with altitude, speed and fuel"
+    },
+    {
+      "id": "orbit-line",
+      "points": 1,
+      "text": "An orbit line above the atmosphere"
+    },
+    {
+      "id": "landing",
+      "points": 1,
+      "text": "Land back on the ground"
+    }
+  ]
+}

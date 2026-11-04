@@ -1,0 +1,7 @@
+node_modules/
+_site/
+.DS_Store
+# per run: the game's own build (web/ is the published copy), the agent's raw output, pi's unscrubbed sessions
+game/dist/
+agent.log
+sessions/

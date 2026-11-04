@@ -1,0 +1,21 @@
+Build a real-time strategy game for the browser with three.js: one skirmish, the player against a computer opponent, on a procedurally generated map.
+
+The map: terrain with hills, cliffs, forests and two resource types, under fog of war that hides what your units can't see and greys out what they have seen. A minimap showing terrain, units and fog that moves the camera when clicked.
+
+The game: workers gather resources and construct buildings; a base, a barracks and a workshop train at least three unit types with different roles (melee, ranged, siege). Box select, right click to move or attack, attack-move, and control groups on 1-9. Units path around terrain and buildings and move as groups without piling up, and 300 units on screen must hold 60 fps on an Apple Silicon Mac. The computer opponent gathers, builds, expands and attacks in waves. The game ends with a victory or defeat screen when a side loses its base.
+
+Must have (checked by playing the game):
+- Drag a box to select units, right click to move them
+- Workers gather resources and the counter goes up
+- Build a barracks and train units from it
+- Three or more unit types
+- Fog of war hides the unexplored map
+- A minimap, and clicking it moves the camera
+- Computer units attack you
+- A victory or defeat screen
+
+Setup and rules:
+- Use Vite and the latest three.js from npm, plain JavaScript modules.
+- Write tools/shot.mjs with Playwright (Chromium) that loads the built game, waits for it to render and saves three screenshots to shots/. Look at the screenshots yourself and fix whatever looks wrong.
+- `npm run build` must pass. Write README.md (what it is, controls) and DONE.md (what you built, what you checked, what you would improve next).
+- Work autonomously to the end; do not stop to ask questions. If something fails, fix it and keep going.

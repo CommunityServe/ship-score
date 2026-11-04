@@ -1,0 +1,48 @@
+{
+  "prompt": "voxel-sandbox",
+  "version": "v1",
+  "difficulty": 2,
+  "sha256": "9e36e83443bada572260f423974e0c0fdd16e7bc8d4d3a98fb4a28e1279ac42d",
+  "items": [
+    {
+      "id": "walk",
+      "points": 3,
+      "text": "Walk with WASD and look around with the mouse"
+    },
+    {
+      "id": "break",
+      "points": 1,
+      "text": "Left click removes a block"
+    },
+    {
+      "id": "place",
+      "points": 1,
+      "text": "Right click adds a block"
+    },
+    {
+      "id": "hotbar",
+      "points": 1,
+      "text": "Keys 1-9 change the highlighted hotbar slot"
+    },
+    {
+      "id": "jump",
+      "points": 1,
+      "text": "Space jumps"
+    },
+    {
+      "id": "water",
+      "points": 1,
+      "text": "Water is visible"
+    },
+    {
+      "id": "trees",
+      "points": 1,
+      "text": "Trees are visible"
+    },
+    {
+      "id": "hills",
+      "points": 1,
+      "text": "The ground has hills"
+    }
+  ]
+}
