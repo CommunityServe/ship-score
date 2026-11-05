@@ -113,3 +113,24 @@ test('the comparison draws every submission of one prompt, marks a failed run an
     fs.writeFileSync(path.join(b, 'submission.json'), JSON.stringify({ ...sub, prompt: 'racing' }));
     assert.throws(() => compare([a, b], out), /same prompt/);
 });
+
+test('the agent works outside the repo, where no AGENTS.md or CLAUDE.md above it reaches its context', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const repo = path.resolve(import.meta.dirname, '..', '..');
+    const run = path.join(repo, 'previews', 'test-run-' + process.pid, 'run-1');
+    const agent = `const fs=require('fs'),p=require('path');let d=process.cwd(),ctx=[];
+        for(;;){for(const f of ['AGENTS.md','CLAUDE.md'])if(fs.existsSync(p.join(d,f)))ctx.push(p.join(d,f));const u=p.dirname(d);if(u===d)break;d=u;}
+        fs.writeFileSync('where.json',JSON.stringify({cwd:process.cwd(),ctx}));
+        fs.mkdirSync(process.argv[1],{recursive:true});
+        fs.writeFileSync(p.join(process.argv[1],'s.jsonl'),JSON.stringify({type:'message',message:{role:'user',content:[{type:'text',text:'x'}],timestamp:Date.now()}}));`;
+    try {
+        execFileSync('node', [path.join(repo, 'harness', 'run.mjs'), '--prompt', 'voxel-sandbox', '--dir', run, '--agent', 'pi',
+            '--engine-pid', String(process.pid), '--', 'node', '-e', agent, '{run_dir}/sessions'], { stdio: 'pipe' });
+        const where = JSON.parse(fs.readFileSync(path.join(run, 'game', 'where.json')));
+        assert.ok(!where.cwd.startsWith(repo), `the agent ran inside the repo: ${where.cwd}`);
+        assert.deepEqual(where.ctx, []);
+        assert.ok(fs.existsSync(path.join(run, 'session.jsonl.gz')) && !fs.existsSync(where.cwd), 'session saved, scratch removed');
+    } finally {
+        fs.rmSync(path.dirname(run), { recursive: true, force: true });
+    }
+});

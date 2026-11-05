@@ -2,7 +2,9 @@
 // 90-minute cap, saves the agent's session log (home paths scrubbed), then runs the play check.
 //   node harness/run.mjs --prompt voxel-sandbox --dir previews/voxel-sandbox/v1/<id>/run-1 --agent pi --engine-pid 1234 \
 //     -- pi -p --approve --provider local --model my-model --session-dir {run_dir}/sessions {prompt_text}
-// Placeholders in the agent command: {prompt_text} {prompt_file} {run_dir} {game_dir}.
+// Placeholders in the agent command: {prompt_text} {prompt_file} {run_dir} {game_dir}. The agent works in a scratch
+// folder outside this repo (TMPDIR), copied to <run>/game when it exits: agent harnesses load every AGENTS.md and
+// CLAUDE.md above their folder, and this repo's is the referee's.
 import { spawn } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -28,14 +30,17 @@ if (fs.existsSync(runDir) && fs.readdirSync(runDir).length) throw new Error(`${r
 
 const def = promptDef(name, version);
 if (crypto.createHash('sha256').update(def.text).digest('hex') !== def.sha256) throw new Error('prompt.txt does not match its sha256');
-const game = path.join(runDir, 'game');
-fs.mkdirSync(game, { recursive: true });
-const promptFile = path.join(runDir, 'prompt.txt');
+fs.mkdirSync(runDir, { recursive: true });
+fs.writeFileSync(path.join(runDir, 'prompt.txt'), def.text);
+const work = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'ship-score-')));
+const game = path.join(work, 'game');
+fs.mkdirSync(game);
+const promptFile = path.join(work, 'prompt.txt');
 fs.writeFileSync(promptFile, def.text);
 
 const fill = (a) => a.replaceAll('{prompt_text}', def.text).replaceAll('{prompt_file}', promptFile)
-    .replaceAll('{run_dir}', runDir).replaceAll('{game_dir}', game);
-const scrub = (s) => s.replaceAll(os.homedir(), '~');
+    .replaceAll('{run_dir}', work).replaceAll('{game_dir}', game);
+const scrub = (s) => s.replaceAll(work, '<run>').replaceAll(os.homedir(), '~');
 
 const started = Date.now();
 const stop = sampler(pid, path.join(runDir, 'mem.txt'));
@@ -55,7 +60,8 @@ stop();
 const session = parsers[agent].locate(game, started);
 if (!session) throw new Error(`no ${agent} session log found for ${game}`);
 fs.writeFileSync(path.join(runDir, 'session.jsonl.gz'), zlib.gzipSync(scrub(fs.readFileSync(session, 'utf8'))));
-if (session.startsWith(runDir)) fs.rmSync(path.dirname(session), { recursive: true }); // never commit the unscrubbed copy
+fs.cpSync(game, path.join(runDir, 'game'), { recursive: true });
+fs.rmSync(work, { recursive: true }); // the unscrubbed session goes with it
 fs.writeFileSync(path.join(runDir, 'run.json'), JSON.stringify({
     prompt: name, version, agent, command: cmd.map((a) => scrub(a.replaceAll('{prompt_text}', '<prompt.txt>'))),
     started: new Date(started).toISOString(), ended: new Date().toISOString(), capped, exit,

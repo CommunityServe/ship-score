@@ -65,11 +65,12 @@ node harness/run.mjs --prompt voxel-sandbox --dir <submission>/run-1 --agent cla
   claude -p --dangerously-skip-permissions --model <model id> {prompt_text}
 ```
 
-The agent runs non-interactively inside `<run>/game` with the prompt as its only message. Configure the harness to
-reach the user's engine beforehand (pi: a provider in its config; Claude Code: `ANTHROPIC_BASE_URL` set to the
-engine). Do not touch the run until it exits. The harness then saves the session log with home paths scrubbed and
-runs the play check (`play.json`, frames in `play/`, a publishable copy of the game in `web/`). Ask the user to restart
-the engine before the next run.
+The agent runs non-interactively with the prompt as its only message, in a scratch `game/` folder outside this repo
+(`TMPDIR`: agent harnesses load every `AGENTS.md` and `CLAUDE.md` above their folder, and this one is the referee's),
+copied to `<run>/game` when it exits. Configure the harness to reach the user's engine beforehand (pi: a provider in
+its config; Claude Code: `ANTHROPIC_BASE_URL` set to the engine). Do not touch the run until it exits. The harness
+then saves the session log with home paths scrubbed and runs the play check (`play.json`, frames in `play/`, a
+publishable copy of the game in `web/`). Ask the user to restart the engine before the next run.
 
 ### 4. Judge the checklist (every run that shipped)
 
