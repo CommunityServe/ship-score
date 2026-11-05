@@ -67,7 +67,7 @@ killGroup('SIGKILL');
 fs.cpSync(game, path.join(runDir, 'game'), { recursive: true, verbatimSymlinks: true }); // npm's .bin links are relative
 const session = parsers[agent].locate(game, started);
 if (session) fs.writeFileSync(path.join(runDir, 'session.jsonl.gz'), zlib.gzipSync(scrub(fs.readFileSync(session, 'utf8'))));
-fs.rmSync(work, { recursive: true }); // the unscrubbed session goes with it
+fs.rmSync(work, { recursive: true, force: true, maxRetries: 5 }); // the unscrubbed session goes with it (retries: Finder drops .DS_Store mid-delete)
 fs.writeFileSync(path.join(runDir, 'run.json'), JSON.stringify({
     prompt: name, version, agent, command: cmd.map((a) => scrub(a.replaceAll('{prompt_text}', '<prompt.txt>'))),
     started: new Date(started).toISOString(), ended: new Date().toISOString(), capped, exit,
