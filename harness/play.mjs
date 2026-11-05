@@ -110,7 +110,6 @@ async function playSteps(browser, url, steps, outDir) {
 }
 
 export async function playCheck(runDir, { steps = JSON.parse(fs.readFileSync(path.join(HERE, 'steps.json'), 'utf8')), out = 'play' } = {}) {
-    const { chromium } = await import('playwright');
     const game = path.join(runDir, 'game'), web = path.join(runDir, 'web'), outDir = path.join(runDir, out);
     const extra = out !== 'play';
     fs.mkdirSync(outDir, { recursive: true });
@@ -128,6 +127,7 @@ export async function playCheck(runDir, { steps = JSON.parse(fs.readFileSync(pat
         if (!extra) fs.writeFileSync(path.join(runDir, 'play.json'), JSON.stringify({ ...r, pass: false }, null, 2) + '\n');
         return { ...r, pass: false };
     }
+    const { chromium } = await import('playwright'); // only once there is a game to play: CI runs the tests without it
     const server = await serve(web);
     const browser = await chromium.launch({ headless: true, args: ['--ignore-gpu-blocklist', '--enable-webgl', '--use-angle=metal'] });
     try {
