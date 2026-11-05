@@ -1,0 +1,26 @@
+$ npm run build
+
+> neon-ridge-racer@1.0.0 build
+> vite build
+
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 14 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   3.60 kB │ gzip:   1.13 kB
+dist/assets/index-D3BGa0ve.css    8.50 kB │ gzip:   2.57 kB
+dist/assets/index-CCWRqrRd.js   643.54 kB │ gzip: 165.54 kB
+
+✓ built in 237ms
+$ npx vite build --base ./ --outDir ../web --emptyOutDir
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 14 modules transformed.
+rendering chunks...
+computing gzip size...
+../web/index.html                   3.60 kB │ gzip:   1.13 kB
+../web/assets/index-D3BGa0ve.css    8.50 kB │ gzip:   2.57 kB
+../web/assets/index-CCWRqrRd.js   643.54 kB │ gzip: 165.54 kB
+
+✓ built in 100ms

@@ -1,0 +1,23 @@
+{
+  "prompt": "racing",
+  "version": "v1",
+  "agent": "pi",
+  "command": [
+    "pi",
+    "-p",
+    "--approve",
+    "--thinking",
+    "high",
+    "--provider",
+    "mlx",
+    "--model",
+    "DeepSeek-V4.1-Flash-1017-iQ-MLX-3.0bpw",
+    "--session-dir",
+    "{run_dir}/sessions",
+    "<prompt.txt>"
+  ],
+  "started": "2026-11-05T08:43:40.620Z",
+  "ended": "2026-11-05T09:17:01.847Z",
+  "capped": false,
+  "exit": 0
+}

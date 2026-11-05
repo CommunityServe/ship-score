@@ -1,0 +1,47 @@
+{
+  "prompt": "racing",
+  "version": "v1",
+  "rig": {
+    "machine": "M5 Ultra 80c · 256 GB",
+    "os": "macOS 27.0.1"
+  },
+  "engine": {
+    "name": "sushi",
+    "version": "1.5.0 (origin/main 818b63e4)",
+    "settings": "serve --ctx-size 262144; pi default thinking (the engine applies no budget)"
+  },
+  "model": {
+    "name": "DeepSeek-V4.1-Flash-1017",
+    "quant": "Sushi STQ 1.75bpw",
+    "source": "https://huggingface.co/beamster/DeepSeek-V4.1-Flash-1017-Sushi-STQ-1.75bpw"
+  },
+  "agent": {
+    "name": "pi",
+    "version": "1.4.0"
+  },
+  "inputs": "text+images",
+  "judge": {
+    "model": "claude-opus-5-5"
+  },
+  "notes": "preview, 1 run",
+  "runs": [
+    {
+      "dir": "run-1",
+      "shipped": true,
+      "checklist": 10,
+      "visual": 16,
+      "quality": 0.8889,
+      "avg_gib": 121.65,
+      "minutes": 67.82,
+      "tokens_out": 257912,
+      "tokens_uncached_in": 191403,
+      "tokens_cached_in": 10566531,
+      "tool_calls": 115,
+      "tool_errors": 5,
+      "tok_s": 77.4,
+      "cost": 336.1153,
+      "prompt_matches": true
+    }
+  ],
+  "score": 2.4
+}

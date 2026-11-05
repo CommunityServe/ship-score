@@ -1,0 +1,21 @@
+{
+  "prompt": "racing",
+  "version": "v1",
+  "agent": "pi",
+  "command": [
+    "pi",
+    "-p",
+    "--approve",
+    "--provider",
+    "sushi",
+    "--model",
+    "DeepSeek-V4.1-Flash-1017-Sushi-STQ-1.75bpw",
+    "--session-dir",
+    "{run_dir}/sessions",
+    "<prompt.txt>"
+  ],
+  "started": "2026-11-05T07:09:05.730Z",
+  "ended": "2026-11-05T08:17:10.850Z",
+  "capped": false,
+  "exit": 0
+}

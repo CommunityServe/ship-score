@@ -1,0 +1,26 @@
+$ npm run build
+
+> neon-racer@1.0.0 build
+> vite build
+
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   1.19 kB │ gzip:   0.64 kB
+dist/assets/index-BW_KP5eY.css    2.18 kB │ gzip:   0.89 kB
+dist/assets/index-DK1-_6UB.js   591.64 kB │ gzip: 148.36 kB
+
+✓ built in 225ms
+$ npx vite build --base ./ --outDir ../web --emptyOutDir
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+computing gzip size...
+../web/index.html                   1.19 kB │ gzip:   0.64 kB
+../web/assets/index-BW_KP5eY.css    2.18 kB │ gzip:   0.89 kB
+../web/assets/index-DK1-_6UB.js   591.64 kB │ gzip: 148.36 kB
+
+✓ built in 90ms

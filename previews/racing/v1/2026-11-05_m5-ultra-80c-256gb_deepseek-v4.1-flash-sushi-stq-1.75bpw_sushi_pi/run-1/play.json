@@ -1,0 +1,67 @@
+{
+  "build": true,
+  "web": true,
+  "done": true,
+  "n_errors": 0,
+  "errors": [],
+  "frames": [
+    {
+      "file": "play/01-load.jpg",
+      "stddev": 32.8,
+      "diff": 0
+    },
+    {
+      "file": "play/02-start.jpg",
+      "stddev": 32.8,
+      "diff": 0.2
+    },
+    {
+      "file": "play/03-key-3.jpg",
+      "stddev": 28.4,
+      "diff": 5.2
+    },
+    {
+      "file": "play/04-walk.jpg",
+      "stddev": 27.2,
+      "diff": 15
+    },
+    {
+      "file": "play/05-jump.jpg",
+      "stddev": 27.8,
+      "diff": 7.9
+    },
+    {
+      "file": "play/06-look-right.jpg",
+      "stddev": 28.4,
+      "diff": 12.8
+    },
+    {
+      "file": "play/07-look-back.jpg",
+      "stddev": 29.4,
+      "diff": 11.5
+    },
+    {
+      "file": "play/08-look-left.jpg",
+      "stddev": 31,
+      "diff": 12.2
+    },
+    {
+      "file": "play/09-look-down.jpg",
+      "stddev": 31.9,
+      "diff": 13.6
+    },
+    {
+      "file": "play/10-left-click.jpg",
+      "stddev": 32.1,
+      "diff": 10.6
+    },
+    {
+      "file": "play/11-right-click.jpg",
+      "stddev": 32.1,
+      "diff": 11.8
+    }
+  ],
+  "blank": false,
+  "changed": true,
+  "pass": true
+}

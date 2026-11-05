@@ -1,0 +1,23 @@
+{
+  "prompt": "racing",
+  "version": "v1",
+  "agent": "pi",
+  "command": [
+    "pi",
+    "-p",
+    "--approve",
+    "--thinking",
+    "high",
+    "--provider",
+    "mlx",
+    "--model",
+    "IQ2_XXS",
+    "--session-dir",
+    "{run_dir}/sessions",
+    "<prompt.txt>"
+  ],
+  "started": "2026-11-05T09:18:01.919Z",
+  "ended": "2026-11-05T09:37:25.242Z",
+  "capped": false,
+  "exit": 0
+}

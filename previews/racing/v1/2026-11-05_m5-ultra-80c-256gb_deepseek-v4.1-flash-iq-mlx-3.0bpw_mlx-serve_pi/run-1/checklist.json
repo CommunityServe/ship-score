@@ -1,0 +1,115 @@
+{
+  "judge": "claude-opus-5-5",
+  "items": [
+    {
+      "id": "drive",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/02-accel-w.jpg",
+        "play/extra-1/03-brake-s.jpg",
+        "play/extra-1/08-steer-left-arrow.jpg",
+        "play/extra-2/02-accel.jpg"
+      ],
+      "note": "W 0 to 79 km/h, S down to 26, the car turns with the arrow keys"
+    },
+    {
+      "id": "track",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/01-start.jpg",
+        "play/extra-2/01-idle.jpg"
+      ],
+      "note": "city circuit with lane lines, crossing, barriers, minimap"
+    },
+    {
+      "id": "opponents",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/01-idle.jpg",
+        "play/extra-2/02-accel.jpg",
+        "play/extra-2/06-race-20s.jpg"
+      ],
+      "note": "opponent cars pull away ahead, P4/4; lap time 0.000, 4.000, 6.566, 9.133, 19.183, 29.232 matches the steps' clock"
+    },
+    {
+      "id": "speedometer",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/02-accel.jpg"
+      ],
+      "note": "SPEED km/h with gear"
+    },
+    {
+      "id": "engine-sound",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/frames.json",
+        "play/extra-2/01-idle.jpg",
+        "play/extra-2/02-accel.jpg"
+      ],
+      "note": "-35 dB, centroid 140 Hz at 0 km/h; -19 dB, 325 Hz at 46 km/h; back to -36 dB coasting at 3 km/h"
+    },
+    {
+      "id": "no-asset-files",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/frames.json"
+      ],
+      "note": "no image or audio file in the source"
+    }
+  ],
+  "visual": [
+    {
+      "id": "art",
+      "level": 3,
+      "evidence": [
+        "game/shots/01-start.png",
+        "game/shots/03-highspeed.png"
+      ],
+      "note": "a designed night-city look: amber lamps, cyan glow, one palette"
+    },
+    {
+      "id": "models",
+      "level": 2,
+      "evidence": [
+        "game/shots/01-start.png"
+      ],
+      "note": "cars with taillights, spoiler, underglow; blocky bodies"
+    },
+    {
+      "id": "surfaces",
+      "level": 2,
+      "evidence": [
+        "game/shots/01-start.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "asphalt with lane lines and a crossing, rails with reflectors, textured towers"
+    },
+    {
+      "id": "lighting",
+      "level": 3,
+      "evidence": [
+        "game/shots/01-start.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "street lamps with bloom, headlight pools on the road, underglow"
+    },
+    {
+      "id": "scene",
+      "level": 2,
+      "evidence": [
+        "game/shots/02-accelerating.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "lamps, towers and billboards along the track, much black ground between"
+    },
+    {
+      "id": "ui",
+      "level": 3,
+      "evidence": [
+        "game/shots/01-start.png"
+      ],
+      "note": "slanted styled panels, lap time and best, position, minimap, speed with gear bar"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "judge": "claude-opus-5-5",
+  "items": [
+    {
+      "id": "drive",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/02-accel-w.jpg",
+        "play/extra-1/03-brake-s.jpg",
+        "play/extra-1/04-steer-left-a.jpg",
+        "game/shots/02-accelerated.png"
+      ],
+      "note": "W 92 to 164 km/h, S 101 to 83, the car moves left when steering; sluggish, the HUD reads IDLE while W is held"
+    },
+    {
+      "id": "track",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/01-start.jpg",
+        "play/extra-2/01-idle.jpg"
+      ],
+      "note": "black road edged by two neon lines, start gate"
+    },
+    {
+      "id": "opponents",
+      "pass": false,
+      "evidence": [],
+      "note": "lap count runs 1 to 4 in about 35 s of W-only driving with the same bend in every frame (lap 2 at 1.3 s, lap 4 at 2.2 s): it does not count laps; opponents appear in the game's own shot but never race in the play frames"
+    },
+    {
+      "id": "speedometer",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/02-accel-w.jpg"
+      ],
+      "note": "SPEED km/h readout"
+    },
+    {
+      "id": "engine-sound",
+      "pass": false,
+      "evidence": [],
+      "note": "sound starts on the first key and barely moves (-30 dB throughout, centroid 268-303 Hz) while the speed sits at 83-101 km/h (play/extra-2/frames.json)"
+    },
+    {
+      "id": "no-asset-files",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/frames.json"
+      ],
+      "note": "no image or audio file in the source"
+    }
+  ],
+  "visual": [
+    {
+      "id": "art",
+      "level": 2,
+      "evidence": [
+        "game/shots/01-start.png"
+      ],
+      "note": "neon synthwave palette held throughout, but no mood beyond it"
+    },
+    {
+      "id": "models",
+      "level": 0,
+      "evidence": [
+        "game/shots/02-accelerated.png",
+        "play/extra-1/04-steer-left-a.jpg"
+      ],
+      "note": "cars are boxes with a tail-light bar, no wheels"
+    },
+    {
+      "id": "surfaces",
+      "level": 1,
+      "evidence": [
+        "game/shots/01-start.png"
+      ],
+      "note": "only the buildings' window texture; the road is flat black"
+    },
+    {
+      "id": "lighting",
+      "level": 1,
+      "evidence": [
+        "game/shots/01-start.png"
+      ],
+      "note": "night sky gradient and glowing lines; nothing lights the scene"
+    },
+    {
+      "id": "scene",
+      "level": 1,
+      "evidence": [
+        "game/shots/01-start.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "skyline and a sign or two around a black void"
+    },
+    {
+      "id": "ui",
+      "level": 1,
+      "evidence": [
+        "play/extra-1/02-accel-w.jpg"
+      ],
+      "note": "one readable panel of speed and lap, a controls box"
+    }
+  ]
+}

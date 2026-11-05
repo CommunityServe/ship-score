@@ -1,0 +1,117 @@
+{
+  "judge": "claude-opus-5-5",
+  "items": [
+    {
+      "id": "drive",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/02-accel-w.jpg",
+        "play/extra-1/03-brake-s.jpg",
+        "play/extra-1/04-steer-left-a.jpg",
+        "play/extra-1/05-steer-right-d.jpg"
+      ],
+      "note": "W 0 to 173 km/h, S down to 4, A/D turn the car"
+    },
+    {
+      "id": "track",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/01-start.jpg",
+        "game/shots/shot2-race.png"
+      ],
+      "note": "circuit with curbs, rails, start gantry, minimap"
+    },
+    {
+      "id": "opponents",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/02-accel.jpg",
+        "play/extra-1/07-brake-arrow.jpg",
+        "play/extra-2/06-race-20s.jpg"
+      ],
+      "note": "opponent car ahead and beside the player, position 05/5; lap timer 4.53, 8.58, 11.13, 13.68, 23.73, 33.78 s matches the steps' clock"
+    },
+    {
+      "id": "speedometer",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/02-accel.jpg"
+      ],
+      "note": "telemetry dial with km/h and gear"
+    },
+    {
+      "id": "engine-sound",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/frames.json",
+        "play/extra-2/01-idle.jpg",
+        "play/extra-2/02-accel.jpg",
+        "play/extra-2/03-coast.jpg"
+      ],
+      "note": "-21 dB, centroid 75 Hz at 0 km/h; -16 dB, peak 105 Hz, centroid 195 Hz at 124 km/h; back to 75 Hz at 0"
+    },
+    {
+      "id": "no-asset-files",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/frames.json"
+      ],
+      "note": "no image or audio file in the source"
+    }
+  ],
+  "visual": [
+    {
+      "id": "art",
+      "level": 3,
+      "evidence": [
+        "game/shots/shot1-start.png",
+        "game/shots/shot2-race.png"
+      ],
+      "note": "sunset synthwave: orange sky, magenta rails, curbs in one palette"
+    },
+    {
+      "id": "models",
+      "level": 2,
+      "evidence": [
+        "game/shots/shot1-start.png"
+      ],
+      "note": "opponents with wheels, rims, windows and liveries; the player car is a block with a spoiler"
+    },
+    {
+      "id": "surfaces",
+      "level": 3,
+      "evidence": [
+        "game/shots/shot1-start.png",
+        "game/shots/shot2-race.png"
+      ],
+      "note": "asphalt with markings, red-white curbs, rails, lit facades, checkered gantry"
+    },
+    {
+      "id": "lighting",
+      "level": 2,
+      "evidence": [
+        "game/shots/shot1-start.png"
+      ],
+      "note": "sunset sky, lamps and headlight glow; little light falls on the scene"
+    },
+    {
+      "id": "scene",
+      "level": 3,
+      "evidence": [
+        "game/shots/shot2-race.png",
+        "game/shots/shot3-corner.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "GP gantry, billboards, palms, rocks, hills, buildings"
+    },
+    {
+      "id": "ui",
+      "level": 3,
+      "evidence": [
+        "game/shots/shot1-start.png",
+        "game/shots/shot3-corner.png"
+      ],
+      "note": "gauge with colored arc, nitro bar, position, minimap, countdown and lap overlays"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NEON RUSH — Procedural Racing</title>
+    <style>
+      :root {
+        --hot: #ff4f5e;
+        --cyan: #38e8ff;
+        --amber: #ffc23d;
+        --ink: #050610;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background: radial-gradient(circle at 50% 20%, #171133, #050610 70%);
+        color: #e8f5ff;
+        font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+        overflow: hidden;
+      }
+      #renderer { position: fixed; inset: 0; width: 100% !important; height: 100% !important; display: block; }
+      #loading {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        flex-direction: column; gap: 12px; z-index: 40;
+        background: linear-gradient(160deg, #050610, #130c26);
+        color: #efe7ff; transition: opacity .25s linear;
+      }
+      #loading h1 {
+        font-size: 48px; letter-spacing: 5px; margin: 0; color: var(--cyan);
+        text-shadow: 0 0 22px rgba(56,232,255,.55);
+      }
+      #loading p { font-size: 13px; letter-spacing: 2px; color: #aab5d6; margin: 0; }
+      .hidden { opacity: 0; pointer-events: none; }
+
+      #hud {
+        position: fixed; inset: 0; z-index: 10; pointer-events: none;
+        padding: 18px 28px 18px 28px;
+        font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+      }
+      #hud .title {
+        position: absolute; left: 28px; top: 18px;
+        font-size: 13px; letter-spacing: 3.5px; color: #8e9ec6;
+        text-shadow: 0 0 10px rgba(142,158,198,.3);
+      }
+      #hud .title span { color: var(--hot); }
+      #hud .speed-card {
+        position: absolute; right: 30px; top: 22px;
+        min-width: 250px; padding: 12px 18px 12px 18px;
+        border: 1px solid rgba(255,79,94,.42); border-radius: 12px;
+        background: linear-gradient(135deg, rgba(6,9,20,.84), rgba(20,12,34,.6));
+        box-shadow: 0 0 28px rgba(255,79,94,.18), inset 0 0 20px rgba(255,79,94,.08);
+        text-align: right;
+      }
+      #hud .speed-card .tag {
+        font-size: 10px; letter-spacing: 2.5px; color: #8e9ec6;
+        margin-bottom: 2px;
+      }
+      #hud .speed-card .num {
+        font-size: 48px; line-height: 1; letter-spacing: 1px;
+        color: var(--amber);
+        text-shadow: 0 0 22px rgba(255,194,61,.5);
+      }
+      #hud .speed-card .unit {
+        font-size: 12px; letter-spacing: 2px; color: #aab5d6;
+        margin-left: 6px;
+      }
+      #hud .race-card {
+        position: absolute; left: 28px; top: 58px;
+        min-width: 230px; padding: 11px 16px 11px 16px;
+        border: 1px solid rgba(56,232,255,.28); border-radius: 10px;
+        background: rgba(5,8,16,.6);
+        box-shadow: 0 0 24px rgba(56,232,255,.14);
+      }
+      #hud .race-card .label { font-size: 10px; letter-spacing: 2.5px; color: #8ea9c5; margin-bottom: 2px; }
+      #hud .race-card .lap { font-size: 25px; color: var(--cyan); text-shadow: 0 0 18px rgba(56,232,255,.35); }
+      #hud .race-card .time { font-size: 16px; color: #e3efff; margin-left: 8px; }
+      #hud .race-card .opps { font-size: 10px; letter-spacing: 1.5px; color: #a5b3ca; margin-top: 5px; }
+      #hud .notice {
+        position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%);
+        padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(56,232,255,.25);
+        background: rgba(4,8,18,.5); font-size: 11px; letter-spacing: 2px; color: #aab5d6;
+        white-shadow: none;
+      }
+      #hud .controls {
+        position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%);
+        min-width: 260px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+        padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(255,79,94,.2);
+        background: rgba(4,8,18,.48); font-size: 10px; letter-spacing: 1.5px;
+        color: #b6c2d8;
+      }
+      #hud .controls .key {
+        padding: 4px 8px; border-radius: 6px; color: #ffc23d;
+        background: rgba(255,194,61,.09); border: 1px solid rgba(255,194,61,.2);
+      }
+      #hud .edge {
+        position: absolute; left: 50%; bottom: 50px; transform: translateX(-50%);
+        font-size: 10px; color: var(--hot); letter-spacing: 2px;
+        opacity: .8; transition: opacity .15s;
+      }
+
+      @media (max-width: 720px) {
+        #hud .title { top: 12px; left: 16px; }
+        #hud .speed-card { top: 12px; right: 16px; padding: 10px 12px; min-width: 210px; }
+        #hud .speed-card .num { font-size: 34px; }
+        #hud .race-card { left: 16px; top: 46px; padding: 8px 12px; min-width: 180px; }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="renderer"></canvas>
+    <div id="loading"><h1>NEON RUSH</h1><p>BUILDING THE WORLD FROM NOISE...</p></div>
+    <div id="hud">
+      <div class="title">NEON <span>RUSH</span></div>
+      <div class="speed-card">
+        <div class="tag">CAR VELOCITY</div>
+        <div id="speedNum" class="num">0</div><span id="speedUnit" class="unit">KM/H</span>
+      </div>
+      <div class="race-card">
+        <div class="label">RACE TIMER</div>
+        <div id="lap">LAP <span id="lapNum">1</span></div>
+        <div id="lapTime" class="time">0.00s</div>
+        <div id="opps" class="opps">3 opponents online</div>
+      </div>
+      <div id="edge" class="edge"></div>
+      <div id="controls" class="controls">
+        <span class="key">↑ / W</span> ACCELERATE
+        <span class="key">↓ / S</span> BRAKE
+        <span class="key">← / A</span> STEER LEFT
+        <span class="key">→ / D</span> STEER RIGHT
+        <span class="key">R</span> RESET
+        <span class="key">M</span> MUTE
+      </div>
+    </div>
+    <script type="module">
+      import { boot } from './src/main.js';
+      boot();
+    </script>
+  </body>
+</html>

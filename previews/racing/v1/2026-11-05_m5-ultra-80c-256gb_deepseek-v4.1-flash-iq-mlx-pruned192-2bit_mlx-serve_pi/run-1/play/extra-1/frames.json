@@ -1,0 +1,124 @@
+{
+  "steps": [
+    {
+      "wait": 8000
+    },
+    {
+      "start": true
+    },
+    {
+      "wait": 1000
+    },
+    {
+      "shot": "start"
+    },
+    {
+      "hold": "w",
+      "ms": 3000
+    },
+    {
+      "shot": "accel-w"
+    },
+    {
+      "hold": "s",
+      "ms": 1500
+    },
+    {
+      "shot": "brake-s"
+    },
+    {
+      "hold": "w",
+      "ms": 1500
+    },
+    {
+      "hold": "a",
+      "ms": 1200
+    },
+    {
+      "shot": "steer-left-a"
+    },
+    {
+      "hold": "d",
+      "ms": 1200
+    },
+    {
+      "shot": "steer-right-d"
+    },
+    {
+      "hold": "ArrowUp",
+      "ms": 3000
+    },
+    {
+      "shot": "accel-arrow"
+    },
+    {
+      "hold": "ArrowDown",
+      "ms": 1500
+    },
+    {
+      "shot": "brake-arrow"
+    },
+    {
+      "hold": "ArrowLeft",
+      "ms": 1200
+    },
+    {
+      "shot": "steer-left-arrow"
+    },
+    {
+      "hold": "w",
+      "ms": 6000
+    },
+    {
+      "shot": "race-later"
+    }
+  ],
+  "errors": [],
+  "frames": [
+    {
+      "file": "play/extra-1/01-start.jpg",
+      "stddev": 25.8,
+      "diff": 0
+    },
+    {
+      "file": "play/extra-1/02-accel-w.jpg",
+      "stddev": 25,
+      "diff": 11.3
+    },
+    {
+      "file": "play/extra-1/03-brake-s.jpg",
+      "stddev": 24.7,
+      "diff": 13
+    },
+    {
+      "file": "play/extra-1/04-steer-left-a.jpg",
+      "stddev": 24,
+      "diff": 14.3
+    },
+    {
+      "file": "play/extra-1/05-steer-right-d.jpg",
+      "stddev": 22,
+      "diff": 8.8
+    },
+    {
+      "file": "play/extra-1/06-accel-arrow.jpg",
+      "stddev": 22.6,
+      "diff": 5.8
+    },
+    {
+      "file": "play/extra-1/07-brake-arrow.jpg",
+      "stddev": 22.9,
+      "diff": 8.2
+    },
+    {
+      "file": "play/extra-1/08-steer-left-arrow.jpg",
+      "stddev": 24.8,
+      "diff": 12.7
+    },
+    {
+      "file": "play/extra-1/09-race-later.jpg",
+      "stddev": 22.5,
+      "diff": 12.1
+    }
+  ]
+}

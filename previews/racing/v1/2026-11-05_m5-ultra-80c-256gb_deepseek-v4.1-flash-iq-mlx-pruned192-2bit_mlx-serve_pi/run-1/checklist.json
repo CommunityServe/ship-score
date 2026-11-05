@@ -1,0 +1,116 @@
+{
+  "judge": "claude-opus-5-5",
+  "items": [
+    {
+      "id": "drive",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/02-accel-w.jpg",
+        "play/extra-1/03-brake-s.jpg",
+        "play/extra-1/04-steer-left-a.jpg",
+        "play/extra-1/05-steer-right-d.jpg"
+      ],
+      "note": "W 0 to 260 km/h, S back to 0, A/D turn the car on the road; W-only driving pins it against the start gate while the HUD still reads 260"
+    },
+    {
+      "id": "track",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/01-start.jpg",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "winding road with edge lines, start gate"
+    },
+    {
+      "id": "opponents",
+      "pass": true,
+      "evidence": [
+        "play/extra-1/07-brake-arrow.jpg",
+        "play/extra-1/09-race-later.jpg",
+        "play/extra-2/01-idle.jpg",
+        "play/extra-2/06-race-20s.jpg"
+      ],
+      "note": "opponent cars on the road with their speeds shown; lap timer 9.92, 13.97, 16.52, 19.07, 29.12, 39.17 s matches the steps' clock"
+    },
+    {
+      "id": "speedometer",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/02-accel.jpg"
+      ],
+      "note": "CAR VELOCITY km/h readout"
+    },
+    {
+      "id": "engine-sound",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/frames.json",
+        "play/extra-2/01-idle.jpg",
+        "play/extra-2/02-accel.jpg",
+        "play/extra-2/04-brake.jpg"
+      ],
+      "note": "-36 dB, peak 35 Hz at 0 km/h; -20 dB, peak 211 Hz at 260 km/h; back to 35 Hz after braking to 0"
+    },
+    {
+      "id": "no-asset-files",
+      "pass": true,
+      "evidence": [
+        "play/extra-2/frames.json"
+      ],
+      "note": "no image or audio file in the source"
+    }
+  ],
+  "visual": [
+    {
+      "id": "art",
+      "level": 2,
+      "evidence": [
+        "game/shots/story-01-start.png"
+      ],
+      "note": "dusk purple and neon edges used consistently, little mood"
+    },
+    {
+      "id": "models",
+      "level": 1,
+      "evidence": [
+        "game/shots/story-01-start.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "a toy wedge car with wheels, cone trees, flat-triangle mountains"
+    },
+    {
+      "id": "surfaces",
+      "level": 2,
+      "evidence": [
+        "game/shots/story-02-racing.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "grainy asphalt with dashes, textured grass"
+    },
+    {
+      "id": "lighting",
+      "level": 1,
+      "evidence": [
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "gradient sky with stars; the scene is evenly lit, no light sources"
+    },
+    {
+      "id": "scene",
+      "level": 2,
+      "evidence": [
+        "game/shots/story-02-racing.png",
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "trees, billboards and a gate along the track"
+    },
+    {
+      "id": "ui",
+      "level": 1,
+      "evidence": [
+        "play/extra-1/09-race-later.jpg"
+      ],
+      "note": "plain text panels for timer and speed, a key strip"
+    }
+  ]
+}

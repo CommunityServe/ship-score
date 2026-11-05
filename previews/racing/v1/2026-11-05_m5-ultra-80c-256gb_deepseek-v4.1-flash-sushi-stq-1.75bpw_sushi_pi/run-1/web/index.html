@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEON RIDGE — Arcade Racer</title>
+    <script type="module" crossorigin src="./assets/index-CCWRqrRd.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D3BGa0ve.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+      <div class="fx vignette"></div>
+      <div class="fx scanlines"></div>
+      <div class="fx speed-tint"></div>
+    </div>
+
+    <div id="hud">
+      <div id="brand">
+        <div class="brand-mark">NR</div>
+        <div class="brand-text">
+          <span class="brand-title">NEON RIDGE</span>
+          <span class="brand-sub">RIDGE CITY GP · SECTOR 7</span>
+        </div>
+      </div>
+
+      <section class="panel lap-panel">
+        <div class="panel-label">CURRENT LAP</div>
+        <div class="lap-line"><span id="lap-num">01</span><span id="lap-total">/ 3</span></div>
+        <div class="lap-time" id="lap-time">00:00.00</div>
+        <div class="stat-row"><span>BEST</span><b id="best-time">--:--.--</b></div>
+        <div class="stat-row"><span>LAST</span><b id="last-time">--:--.--</b></div>
+      </section>
+
+      <section class="panel pos-panel">
+        <div class="panel-label">POSITION</div>
+        <div class="pos-line"><span id="pos">01</span><span id="pos-total">/ 5</span></div>
+        <div class="stat-row"><span>RACE</span><b id="race-time">00:00.00</b></div>
+        <div class="map-wrap"><canvas id="minimap"></canvas></div>
+      </section>
+
+      <section class="panel controls-panel">
+        <div class="panel-label">DRIVE</div>
+        <div class="keys">
+          <div class="key-line"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>throttle / steer / brake</span></div>
+          <div class="key-line"><kbd class="wide">SHIFT</kbd><span>nitro boost</span></div>
+          <div class="key-line"><kbd class="wide">SPACE</kbd><span>handbrake drift</span></div>
+          <div class="key-line"><kbd>R</kbd><kbd>C</kbd><kbd>M</kbd><span>reset / camera / mute</span></div>
+        </div>
+        <div class="audio-line">
+          <div class="eq"><i></i><i></i><i></i><i></i></div>
+          <span id="audio-state">SOUND: TAP TO ARM</span>
+        </div>
+        <div class="cam-line">CAM <b id="cam-state">CHASE</b></div>
+      </section>
+
+      <section class="panel gauge-panel">
+        <div class="panel-label">TELEMETRY</div>
+        <span id="speed-value" class="sr-only">0</span>
+      <canvas id="speedo"></canvas>
+        <div class="gauge-foot">
+          <span id="gear-value">GEAR 1</span>
+          <span class="muted" id="nosec">V8 · TURBO</span>
+        </div>
+        <div class="nitro-label"><span>NITRO</span><b id="nitro-pct">100%</b></div>
+        <div class="nitro-track"><div id="nitro-fill"></div></div>
+      </section>
+
+      <div id="message" class="message"></div>
+
+      <div id="track-name">RIDGE CITY · SUNSET RUN</div>
+    </div>
+
+    <div id="results" class="results hidden">
+      <div class="result-card">
+        <div class="result-kicker">RACE COMPLETE</div>
+        <div class="result-title">FINISH LINE</div>
+        <div class="result-grid">
+          <div><span>POSITION</span><b id="result-place">1</b></div>
+          <div><span>TOTAL TIME</span><b id="result-time">--:--.--</b></div>
+          <div><span>BEST LAP</span><b id="result-best">--:--.--</b></div>
+        </div>
+        <div class="result-hint">PRESS <kbd>R</kbd> TO RACE AGAIN</div>
+      </div>
+    </div>
+
+  </body>
+</html>

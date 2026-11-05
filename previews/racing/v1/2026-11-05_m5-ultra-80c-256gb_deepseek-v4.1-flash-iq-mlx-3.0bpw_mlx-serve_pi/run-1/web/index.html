@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NIGHT SHIFT // City Circuit</title>
+  <script type="module" crossorigin src="./assets/index-M0fgpCDf.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CvB21H8T.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <div id="vignette"></div>
+
+    <div class="panel top-left">
+      <div class="brand">NIGHT<span>SHIFT</span></div>
+      <div class="sub">CITY CIRCUIT // RACE 01</div>
+      <div class="race-row">
+        <div class="chip"><span id="lapNumber">LAP 1</span></div>
+        <div class="chip accent"><span id="position">P4 / 4</span></div>
+      </div>
+    </div>
+
+    <div class="panel top-center">
+      <div class="timer-label">LAP TIME</div>
+      <div id="lapTime" class="lap-time">0:00.000</div>
+      <div class="best-row">BEST <span id="bestTime">--:--.---</span></div>
+    </div>
+
+    <div class="panel minimap-panel">
+      <div class="minimap-label">CITY LOOP</div>
+      <canvas id="minimap" width="220" height="220"></canvas>
+      <div class="minimap-foot"><span id="raceTime">RACE 0:00</span></div>
+    </div>
+
+    <div id="speedometer" class="panel">
+      <div class="spd-label">SPEED</div>
+      <div class="spd-number"><span id="speed">0</span><small>KM/H</small></div>
+      <div class="gear-row"><span class="gear-label">GEAR</span><span id="gear">1</span></div>
+      <div class="rpm-track"><div id="rpmFill"></div><div class="rpm-ticks"></div></div>
+    </div>
+
+    <div class="controls">
+      <div><b>W / ↑</b> accelerate</div>
+      <div><b>S / ↓</b> brake / reverse</div>
+      <div><b>A D / ← →</b> steer</div>
+      <div><b>SPACE</b> handbrake drift</div>
+      <div><b>R</b> reset car</div>
+    </div>
+
+    <div id="offroad" class="warning">OFF TRACK</div>
+    <div id="audioHint" class="audio-hint">ENGINE AUDIO STARTS ON FIRST INPUT</div>
+  </div>
+</body>
+</html>

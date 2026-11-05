@@ -1,0 +1,120 @@
+{
+  "steps": [
+    {
+      "wait": 8000
+    },
+    {
+      "start": true
+    },
+    {
+      "wait": 1500
+    },
+    {
+      "shot": "idle"
+    },
+    {
+      "hold": "w",
+      "ms": 4000
+    },
+    {
+      "shot": "accel"
+    },
+    {
+      "wait": 2500
+    },
+    {
+      "shot": "coast"
+    },
+    {
+      "hold": "s",
+      "ms": 2500
+    },
+    {
+      "shot": "brake"
+    },
+    {
+      "hold": "w",
+      "ms": 10000
+    },
+    {
+      "shot": "race-10s"
+    },
+    {
+      "hold": "w",
+      "ms": 10000
+    },
+    {
+      "shot": "race-20s"
+    }
+  ],
+  "errors": [],
+  "assets": [],
+  "frames": [
+    {
+      "file": "play/extra-2/01-idle.jpg",
+      "stddev": 39.6,
+      "diff": 0,
+      "audio": {
+        "db": -35,
+        "peak_hz": 129,
+        "centroid_hz": 140,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/02-accel.jpg",
+      "stddev": 32.5,
+      "diff": 20.7,
+      "audio": {
+        "db": -19,
+        "peak_hz": 47,
+        "centroid_hz": 325,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/03-coast.jpg",
+      "stddev": 30.8,
+      "diff": 14.1,
+      "audio": {
+        "db": -36,
+        "peak_hz": 47,
+        "centroid_hz": 254,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/04-brake.jpg",
+      "stddev": 27.6,
+      "diff": 13.8,
+      "audio": {
+        "db": -34,
+        "peak_hz": 47,
+        "centroid_hz": 492,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/05-race-10s.jpg",
+      "stddev": 29.2,
+      "diff": 10.5,
+      "audio": {
+        "db": -20,
+        "peak_hz": 82,
+        "centroid_hz": 395,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/06-race-20s.jpg",
+      "stddev": 31.8,
+      "diff": 15.6,
+      "audio": {
+        "db": -18,
+        "peak_hz": 223,
+        "centroid_hz": 289,
+        "state": "running"
+      }
+    }
+  ]
+}

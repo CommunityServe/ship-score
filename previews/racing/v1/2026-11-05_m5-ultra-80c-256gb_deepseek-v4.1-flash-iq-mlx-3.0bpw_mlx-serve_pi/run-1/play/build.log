@@ -1,0 +1,26 @@
+$ npm run build
+
+> night-shift-racer@1.0.0 build
+> vite build
+
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 23 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   2.00 kB │ gzip:   0.83 kB
+dist/assets/index-CvB21H8T.css    4.04 kB │ gzip:   1.43 kB
+dist/assets/index-M0fgpCDf.js   605.12 kB │ gzip: 152.47 kB
+
+✓ built in 286ms
+$ npx vite build --base ./ --outDir ../web --emptyOutDir
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 23 modules transformed.
+rendering chunks...
+computing gzip size...
+../web/index.html                   2.00 kB │ gzip:   0.83 kB
+../web/assets/index-CvB21H8T.css    4.04 kB │ gzip:   1.43 kB
+../web/assets/index-M0fgpCDf.js   605.12 kB │ gzip: 152.47 kB
+
+✓ built in 100ms

@@ -1,0 +1,118 @@
+{
+  "steps": [
+    {
+      "wait": 8000
+    },
+    {
+      "start": true
+    },
+    {
+      "wait": 1500
+    },
+    {
+      "shot": "idle"
+    },
+    {
+      "hold": "w",
+      "ms": 4000
+    },
+    {
+      "shot": "accel"
+    },
+    {
+      "wait": 2500
+    },
+    {
+      "shot": "coast"
+    },
+    {
+      "hold": "s",
+      "ms": 2500
+    },
+    {
+      "shot": "brake"
+    },
+    {
+      "hold": "w",
+      "ms": 10000
+    },
+    {
+      "shot": "race-10s"
+    },
+    {
+      "hold": "w",
+      "ms": 10000
+    },
+    {
+      "shot": "race-20s"
+    }
+  ],
+  "errors": [],
+  "assets": [],
+  "frames": [
+    {
+      "file": "play/extra-2/01-idle.jpg",
+      "stddev": 26.5,
+      "diff": 0,
+      "audio": {
+        "db": null,
+        "contexts": []
+      }
+    },
+    {
+      "file": "play/extra-2/02-accel.jpg",
+      "stddev": 28,
+      "diff": 9.1,
+      "audio": {
+        "db": -30,
+        "peak_hz": 47,
+        "centroid_hz": 303,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/03-coast.jpg",
+      "stddev": 20.6,
+      "diff": 8.7,
+      "audio": {
+        "db": -30,
+        "peak_hz": 47,
+        "centroid_hz": 295,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/04-brake.jpg",
+      "stddev": 21.3,
+      "diff": 7.3,
+      "audio": {
+        "db": -30,
+        "peak_hz": 35,
+        "centroid_hz": 268,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/05-race-10s.jpg",
+      "stddev": 20.6,
+      "diff": 6.6,
+      "audio": {
+        "db": -30,
+        "peak_hz": 35,
+        "centroid_hz": 285,
+        "state": "running"
+      }
+    },
+    {
+      "file": "play/extra-2/06-race-20s.jpg",
+      "stddev": 21,
+      "diff": 5.5,
+      "audio": {
+        "db": -30,
+        "peak_hz": 47,
+        "centroid_hz": 277,
+        "state": "running"
+      }
+    }
+  ]
+}

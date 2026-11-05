@@ -1,0 +1,47 @@
+{
+  "prompt": "racing",
+  "version": "v1",
+  "rig": {
+    "machine": "M5 Ultra 80c · 256 GB",
+    "os": "macOS 27.0.1"
+  },
+  "engine": {
+    "name": "mlx-serve",
+    "version": "26.11.2 candidate (main bc6c5f2c)",
+    "settings": "--mlx-gguf, --ctx-size 262144; pi --thinking high; vision sidecar is a llama.cpp clip mmproj, not served"
+  },
+  "model": {
+    "name": "DeepSeek-V4.1-Flash-1017",
+    "quant": "GSQ-RCO Coder IQ2_XXS (GGUF)",
+    "source": "https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-Coder-GGUF"
+  },
+  "agent": {
+    "name": "pi",
+    "version": "1.4.0"
+  },
+  "inputs": "text",
+  "judge": {
+    "model": "claude-opus-5-5"
+  },
+  "notes": "preview, 1 run",
+  "runs": [
+    {
+      "dir": "run-1",
+      "shipped": true,
+      "checklist": 7,
+      "visual": 6,
+      "quality": 0.2333,
+      "avg_gib": 80.95,
+      "minutes": 19.26,
+      "tokens_out": 76320,
+      "tokens_uncached_in": 114107,
+      "tokens_cached_in": 5325908,
+      "tool_calls": 78,
+      "tool_errors": 5,
+      "tok_s": 81.9,
+      "cost": 32.9974,
+      "prompt_matches": true
+    }
+  ],
+  "score": 1.6
+}
