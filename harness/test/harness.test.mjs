@@ -122,7 +122,9 @@ test('the agent works outside the repo, where no AGENTS.md or CLAUDE.md above it
         for(;;){for(const f of ['AGENTS.md','CLAUDE.md'])if(fs.existsSync(p.join(d,f)))ctx.push(p.join(d,f));const u=p.dirname(d);if(u===d)break;d=u;}
         fs.writeFileSync('where.json',JSON.stringify({cwd:process.cwd(),ctx}));
         fs.mkdirSync(process.argv[1],{recursive:true});
-        fs.writeFileSync(p.join(process.argv[1],'s.jsonl'),JSON.stringify({type:'message',message:{role:'user',content:[{type:'text',text:'x'}],timestamp:Date.now()}}));`;
+        fs.writeFileSync(p.join(process.argv[1],'s.jsonl'),JSON.stringify({type:'message',message:{role:'user',content:[{type:'text',text:'x'}],timestamp:Date.now()}}));
+        fs.mkdirSync('node_modules/.bin',{recursive:true});fs.mkdirSync('node_modules/vite/bin',{recursive:true});
+        fs.writeFileSync('node_modules/vite/bin/vite.js','');fs.symlinkSync('../vite/bin/vite.js','node_modules/.bin/vite');`;
     try {
         execFileSync('node', [path.join(repo, 'harness', 'run.mjs'), '--prompt', 'voxel-sandbox', '--dir', run, '--agent', 'pi',
             '--engine-pid', String(process.pid), '--', 'node', '-e', agent, '{run_dir}/sessions'], { stdio: 'pipe' });
@@ -130,6 +132,7 @@ test('the agent works outside the repo, where no AGENTS.md or CLAUDE.md above it
         assert.ok(!where.cwd.startsWith(repo), `the agent ran inside the repo: ${where.cwd}`);
         assert.deepEqual(where.ctx, []);
         assert.ok(fs.existsSync(path.join(run, 'session.jsonl.gz')) && !fs.existsSync(where.cwd), 'session saved, scratch removed');
+        assert.ok(fs.existsSync(path.join(run, 'game', 'node_modules', '.bin', 'vite')), 'npm\'s relative .bin links still resolve in the run');
     } finally {
         fs.rmSync(path.dirname(run), { recursive: true, force: true });
     }
