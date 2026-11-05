@@ -7,7 +7,8 @@ import test from 'node:test';
 import zlib from 'node:zlib';
 import { avgGib, promptDef, scoreSubmission, total } from '../score.mjs';
 import { parsers } from '../sessions.mjs';
-import { check } from '../validate.mjs';
+import { check, submissions } from '../validate.mjs';
+import { tree } from '../memory.mjs';
 import { compare } from '../compare.mjs';
 
 const def = promptDef('voxel-sandbox', 'v1');
@@ -124,7 +125,8 @@ test('the agent works outside the repo, where no AGENTS.md or CLAUDE.md above it
         fs.mkdirSync(process.argv[1],{recursive:true});
         fs.writeFileSync(p.join(process.argv[1],'s.jsonl'),JSON.stringify({type:'message',message:{role:'user',content:[{type:'text',text:'x'}],timestamp:Date.now()}}));
         fs.mkdirSync('node_modules/.bin',{recursive:true});fs.mkdirSync('node_modules/vite/bin',{recursive:true});
-        fs.writeFileSync('node_modules/vite/bin/vite.js','');fs.symlinkSync('../vite/bin/vite.js','node_modules/.bin/vite');`;
+        fs.writeFileSync('node_modules/vite/bin/vite.js','');fs.symlinkSync('../vite/bin/vite.js','node_modules/.bin/vite');
+        const dev=require('child_process').spawn('sleep',['300'],{stdio:'ignore'});dev.unref();fs.writeFileSync('dev.pid',String(dev.pid));`;
     try {
         execFileSync('node', [path.join(repo, 'harness', 'run.mjs'), '--prompt', 'voxel-sandbox', '--dir', run, '--agent', 'pi',
             '--engine-pid', String(process.pid), '--', 'node', '-e', agent, '{run_dir}/sessions'], { stdio: 'pipe' });
@@ -133,7 +135,58 @@ test('the agent works outside the repo, where no AGENTS.md or CLAUDE.md above it
         assert.deepEqual(where.ctx, []);
         assert.ok(fs.existsSync(path.join(run, 'session.jsonl.gz')) && !fs.existsSync(where.cwd), 'session saved, scratch removed');
         assert.ok(fs.existsSync(path.join(run, 'game', 'node_modules', '.bin', 'vite')), 'npm\'s relative .bin links still resolve in the run');
+        const dev = Number(fs.readFileSync(path.join(run, 'game', 'dev.pid'), 'utf8'));
+        assert.throws(() => process.kill(dev, 0), /ESRCH/, 'a process the agent left running died with the run');
     } finally {
         fs.rmSync(path.dirname(run), { recursive: true, force: true });
     }
+});
+
+test('a run whose agent wrote no session log still keeps its game', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const repo = path.resolve(import.meta.dirname, '..', '..');
+    const run = path.join(repo, 'previews', 'test-run-nolog-' + process.pid, 'run-1');
+    try {
+        assert.throws(() => execFileSync('node', [path.join(repo, 'harness', 'run.mjs'), '--prompt', 'voxel-sandbox', '--dir', run,
+            '--agent', 'pi', '--engine-pid', String(process.pid), '--', 'node', '-e', "require('fs').writeFileSync('main.js','game')"],
+        { stdio: 'pipe' }), /no pi session log found/);
+        assert.equal(fs.readFileSync(path.join(run, 'game', 'main.js'), 'utf8'), 'game');
+        assert.ok(fs.existsSync(path.join(run, 'run.json')));
+    } finally {
+        fs.rmSync(path.dirname(run), { recursive: true, force: true });
+    }
+});
+
+test('memory follows the engine\'s child processes', async () => {
+    const { spawn } = await import('node:child_process');
+    const kid = spawn('sleep', ['30'], { stdio: 'ignore' });
+    try {
+        assert.ok(tree(process.pid).includes(kid.pid));
+    } finally {
+        kid.kill();
+    }
+});
+
+test('the validator refuses a run without memory samples', () => {
+    const dir = makeSubmission(tmp());
+    fs.writeFileSync(path.join(dir, 'run-2', 'mem.txt'), '');
+    assert.match(check(dir).join('\n'), /run-2: mem.txt has no sample/);
+});
+
+test('the validator skips what git ignores and Finder litter, and reports bad input instead of throwing', () => {
+    const root = tmp(), dir = makeSubmission(root);
+    for (const d of [path.join(root, 'previews'), path.join(root, 'results', 'voxel-sandbox'), dir, path.join(dir, 'run-1')]) {
+        fs.mkdirSync(d, { recursive: true });
+        fs.writeFileSync(path.join(d, '.DS_Store'), 'x');
+    }
+    fs.mkdirSync(path.join(dir, 'run-1', 'game', 'node_modules', '.bin'), { recursive: true });
+    fs.symlinkSync('../x', path.join(dir, 'run-1', 'game', 'node_modules', '.bin', 'vite'));
+    fs.writeFileSync(path.join(dir, 'run-1', 'game', 'node_modules', 'big'), Buffer.alloc(30 * 2 ** 20));
+    assert.deepEqual(submissions(root), [dir]);
+    assert.deepEqual(check(dir), []);
+    const sub = JSON.parse(fs.readFileSync(path.join(dir, 'submission.json')));
+    fs.writeFileSync(path.join(dir, 'submission.json'), JSON.stringify({ ...sub, agent: undefined }));
+    assert.match(check(dir).join('\n'), /needs agent.name/);
+    fs.writeFileSync(path.join(dir, 'submission.json'), '{ not json');
+    assert.match(check(dir).join('\n'), /^submission.json: /);
 });

@@ -25,7 +25,7 @@ const sh = (cmd, cwd, log) => {
 const serve = (root) => new Promise((done) => {
     const server = http.createServer((req, res) => {
         let f = path.join(root, decodeURIComponent(new URL(req.url, 'http://x').pathname));
-        if (!f.startsWith(root)) return res.writeHead(403).end();
+        if (f !== root && !f.startsWith(root + path.sep)) return res.writeHead(403).end();
         if (fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, 'index.html');
         if (!fs.existsSync(f)) return res.writeHead(404).end();
         res.writeHead(200, { 'content-type': TYPES[path.extname(f)] ?? 'application/octet-stream' }).end(fs.readFileSync(f));

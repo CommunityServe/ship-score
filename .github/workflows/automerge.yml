@@ -38,5 +38,11 @@ jobs:
             echo "PR $PR adds files outside a submission folder: a maintainer merges it"; exit 0
           fi
           [ "$(cut -d' ' -f2 files.txt | cut -d/ -f1-4 | sort -u | wc -l)" -eq 1 ] || { echo "one submission per PR"; exit 0; }
+          # A new submission only: added files inside someone else's folder (a made-up run-2) are not one.
+          DIR=$(head -1 files.txt | cut -d' ' -f2 | cut -d/ -f1-4)
+          if found=$(gh api "repos/$GH_REPO/contents/$DIR?ref=main" 2>&1); then
+            echo "$DIR already exists on main: a maintainer merges it"; exit 0
+          fi
+          grep -q 'HTTP 404' <<<"$found" || { echo "could not check $DIR on main: $found"; exit 1; }
           gh pr merge "$PR" --squash --match-head-commit "$HEAD_SHA"
           gh workflow run pages.yml --ref main

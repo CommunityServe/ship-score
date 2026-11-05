@@ -45,27 +45,34 @@ const scrub = (s) => s.replaceAll(work, '<run>').replaceAll(os.homedir(), '~');
 const started = Date.now();
 const stop = sampler(pid, path.join(runDir, 'mem.txt'));
 const log = fs.openSync(path.join(runDir, 'agent.log'), 'w');
-const child = spawn(cmd[0], cmd.slice(1).map(fill), { cwd: game, stdio: ['ignore', log, log] });
+// The agent leads its own process group, so dev servers and browsers it started die with it instead of running into
+// the next run's time and memory.
+const child = spawn(cmd[0], cmd.slice(1).map(fill), { cwd: game, stdio: ['ignore', log, log], detached: true });
+const killGroup = (sig) => { try { process.kill(-child.pid, sig); } catch { /* already gone */ } };
 let capped = false;
 const cap = setTimeout(() => {
     capped = true; // the 90-minute cap is the only stop a run gets
-    child.kill('SIGTERM');
-    setTimeout(() => child.kill('SIGKILL'), 10_000).unref();
+    killGroup('SIGTERM');
+    setTimeout(() => killGroup('SIGKILL'), 10_000).unref();
 }, CAP_MIN * 60_000);
 console.log(`run started ${new Date(started).toISOString()}: hands off until the agent exits (cap ${CAP_MIN} min)`);
 const exit = await new Promise((done) => child.on('exit', (code, signal) => done(code ?? signal)));
 clearTimeout(cap);
 stop();
+killGroup('SIGTERM');
+await new Promise((done) => setTimeout(done, 2000));
+killGroup('SIGKILL');
 
-const session = parsers[agent].locate(game, started);
-if (!session) throw new Error(`no ${agent} session log found for ${game}`);
-fs.writeFileSync(path.join(runDir, 'session.jsonl.gz'), zlib.gzipSync(scrub(fs.readFileSync(session, 'utf8'))));
+// The game first: a missing session log must not lose it.
 fs.cpSync(game, path.join(runDir, 'game'), { recursive: true, verbatimSymlinks: true }); // npm's .bin links are relative
+const session = parsers[agent].locate(game, started);
+if (session) fs.writeFileSync(path.join(runDir, 'session.jsonl.gz'), zlib.gzipSync(scrub(fs.readFileSync(session, 'utf8'))));
 fs.rmSync(work, { recursive: true }); // the unscrubbed session goes with it
 fs.writeFileSync(path.join(runDir, 'run.json'), JSON.stringify({
     prompt: name, version, agent, command: cmd.map((a) => scrub(a.replaceAll('{prompt_text}', '<prompt.txt>'))),
     started: new Date(started).toISOString(), ended: new Date().toISOString(), capped, exit,
 }, null, 2) + '\n');
+if (!session) throw new Error(`no ${agent} session log found: the game is in ${path.join(runDir, 'game')}, the run does not validate`);
 console.log(`agent exited (${exit})${capped ? ' at the cap' : ''}; play check...`);
 const play = await playCheck(runDir);
 console.log(`play check ${play.pass ? 'passed' : 'FAILED'}: build ${play.build}, DONE.md ${play.done}, errors ${play.n_errors ?? '-'}, `

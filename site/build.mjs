@@ -2,7 +2,7 @@
 // every run's frames, checklist and a playable copy of the game. `node site/build.mjs [out dir]` (default _site).
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, scoreSubmission } from '../harness/score.mjs';
+import { ROOT, scoreSubmission, subdirs } from '../harness/score.mjs';
 import { submissions } from '../harness/validate.mjs';
 import { CSS, esc, ktok, mean, mmss, page as ui } from '../harness/ui.mjs';
 
@@ -10,7 +10,7 @@ const OUT = path.resolve(process.argv[2] ?? path.join(ROOT, '_site'));
 const REPO = 'https://github.com/CommunityServe/ship-score';
 const page = (title, body, depth) => ui(title, body, `<link rel="stylesheet" href="${'../'.repeat(depth)}style.css">`);
 
-const prompts = fs.readdirSync(path.join(ROOT, 'prompts')).flatMap((p) => fs.readdirSync(path.join(ROOT, 'prompts', p)).map((v) => {
+const prompts = subdirs(path.join(ROOT, 'prompts')).flatMap((p) => subdirs(path.join(ROOT, 'prompts', p)).map((v) => {
     const c = JSON.parse(fs.readFileSync(path.join(ROOT, 'prompts', p, v, 'checklist.json'), 'utf8'));
     return { ...c, key: `${p}/${v}` };
 })).sort((a, b) => a.difficulty - b.difficulty || a.prompt.localeCompare(b.prompt));

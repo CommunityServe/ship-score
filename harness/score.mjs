@@ -11,6 +11,8 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const CAP_MIN = 90;
 const round = (x, d) => Math.round(x * 10 ** d) / 10 ** d;
 const json = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
+// The folders in a folder: Finder's .DS_Store and other files are not prompts, versions or submissions.
+export const subdirs = (dir) => fs.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
 
 export const promptDef = (name, version) => {
     const d = path.join(ROOT, 'prompts', name, version);
@@ -42,9 +44,9 @@ export function scoreRun(runDir, def) {
     const pts = shipped ? passed(def, json(path.join(runDir, 'checklist.json')), runDir).reduce((a, i) => a + i.points, 0) : 0;
     const mtok = (s.out + s.uncached) / 1e6;
     return {
-        dir: path.basename(runDir), shipped, checklist: pts, avg_gib: round(gib, 2), minutes: round(minutes, 2),
+        dir: path.basename(runDir), shipped, checklist: pts, avg_gib: gib === null ? null : round(gib, 2), minutes: round(minutes, 2),
         tokens_out: s.out, tokens_uncached_in: s.uncached, tokens_cached_in: s.cached, tool_calls: s.calls, tool_errors: s.errors,
-        cost: round(Math.sqrt(gib) * minutes * mtok, 4), prompt_matches: s.prompt?.trim() === def.text.trim(),
+        cost: gib === null ? 0 : round(Math.sqrt(gib) * minutes * mtok, 4), prompt_matches: s.prompt?.trim() === def.text.trim(),
     };
 }
 
@@ -57,7 +59,7 @@ export const total = (runs) => {
 export function scoreSubmission(dir) {
     const sub = json(path.join(dir, 'submission.json'));
     const def = promptDef(sub.prompt, sub.version);
-    const runs = fs.readdirSync(dir).filter((d) => /^run-\d+$/.test(d)).sort().map((d) => scoreRun(path.join(dir, d), def));
+    const runs = subdirs(dir).filter((d) => /^run-\d+$/.test(d)).sort().map((d) => scoreRun(path.join(dir, d), def));
     return { sub, def, runs, score: total(runs) };
 }
 
