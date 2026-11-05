@@ -12,6 +12,9 @@ prepare the submission. Never write, fix or hint at the game's code. The model u
 - **No help.** Once a run starts nobody steps in: no nudges, no answers, no killed tools. The only stop is the
   90-minute cap, which the harness enforces. A run anyone helped is void: do not submit it.
 - **Fresh start.** A new empty folder per run, and the engine restarted between runs (ask the user to do it).
+- **256k context.** The agent gets a 262,144-token context window (or the model's own maximum, if smaller), set in
+  the agent harness and served by the engine. Harness defaults are far lower (pi assumes 128k for a model it does not
+  know; mlx-serve's pi extension falls back to 32k) and would cap the model instead of measuring it.
 - **Name the inputs.** `text` or `text+images` (the agent can look at its own screenshots). Give the model images if
   it supports them.
 - **Official results take 3 runs** on one rig (`results/`); 1 or 2 runs go to `previews/`, shown but not ranked.
@@ -68,9 +71,17 @@ node harness/run.mjs --prompt voxel-sandbox --dir <submission>/run-1 --agent cla
 The agent runs non-interactively with the prompt as its only message, in a scratch `game/` folder outside this repo
 (`TMPDIR`: agent harnesses load every `AGENTS.md` and `CLAUDE.md` above their folder, and this one is the referee's),
 copied to `<run>/game` when it exits. Configure the harness to reach the user's engine beforehand (pi: a provider in
-its config; Claude Code: `ANTHROPIC_BASE_URL` set to the engine). Do not touch the run until it exits. The harness
-then saves the session log with home paths scrubbed and runs the play check (`play.json`, frames in `play/`, a
-publishable copy of the game in `web/`). Ask the user to restart the engine before the next run.
+its config; Claude Code: `ANTHROPIC_BASE_URL` set to the engine) with the 256k context: the engine serving a
+262,144-token context and, for pi, a `modelOverrides` entry in `~/.pi/agent/models.json` (it also applies to models an
+extension registers, such as mlx-serve's `mlx` provider):
+
+```json
+{ "providers": { "<provider>": { "modelOverrides": { "<model id>": { "contextWindow": 262144 } } } } }
+```
+
+Do not touch the run until it exits. The harness then saves the session log with home paths scrubbed and runs the play
+check (`play.json`, frames in `play/`, a publishable copy of the game in `web/`). Ask the user to restart the engine
+before the next run.
 
 ### 4. Judge the checklist (every run that shipped)
 
