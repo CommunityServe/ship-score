@@ -1,7 +1,7 @@
 // One Ship Score run. Makes <run>/game, samples the engine's memory, starts the agent on the pinned prompt with the
 // 90-minute cap, saves the agent's session log (home paths scrubbed), then runs the play check.
 //   node harness/run.mjs --prompt voxel-sandbox --dir previews/voxel-sandbox/v1/<id>/run-1 --agent pi --engine-pid 1234 \
-//     -- pi -p --approve --provider local --model my-model --session-dir {run_dir}/sessions {prompt_text}
+//     -- pi -p --approve --thinking high --provider local --model my-model --session-dir {run_dir}/sessions {prompt_text}
 // Placeholders in the agent command: {prompt_text} {prompt_file} {run_dir} {game_dir}. The agent works in a scratch
 // folder outside this repo (TMPDIR), copied to <run>/game when it exits: agent harnesses load every AGENTS.md and
 // CLAUDE.md above their folder, and this repo's is the referee's.

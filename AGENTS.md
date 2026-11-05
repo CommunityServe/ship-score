@@ -15,6 +15,9 @@ prepare the submission. Never write, fix or hint at the game's code. The model u
 - **256k context.** The agent gets a 262,144-token context window (or the model's own maximum, if smaller), set in
   the agent harness and served by the engine. Harness defaults are far lower (pi assumes 128k for a model it does not
   know; mlx-serve's pi extension falls back to 32k) and would cap the model instead of measuring it.
+- **Thinking: high.** Every run sets the agent harness's thinking level to `high` (pi `--thinking high`, Claude Code
+  `--effort high`), so runs compare at one setting instead of at each harness's default. A model with no thinking mode
+  runs as it is.
 - **Name the inputs.** `text` or `text+images` (the agent can look at its own screenshots). Give the model images if
   it supports them.
 - **Official results take 3 runs** on one rig (`results/`); 1 or 2 runs go to `previews/`, shown but not ranked.
@@ -62,10 +65,10 @@ when you will make 3 runs.
 
 ```
 node harness/run.mjs --prompt voxel-sandbox --dir <submission>/run-1 --agent pi --engine-pid <PID> -- \
-  pi -p --approve --provider <provider> --model <model id> --session-dir {run_dir}/sessions {prompt_text}
+  pi -p --approve --thinking high --provider <provider> --model <model id> --session-dir {run_dir}/sessions {prompt_text}
 
 node harness/run.mjs --prompt voxel-sandbox --dir <submission>/run-1 --agent claude-code --engine-pid <PID> -- \
-  claude -p --dangerously-skip-permissions --model <model id> {prompt_text}
+  claude -p --dangerously-skip-permissions --effort high --model <model id> {prompt_text}
 ```
 
 The agent runs non-interactively with the prompt as its only message, in a scratch `game/` folder outside this repo
