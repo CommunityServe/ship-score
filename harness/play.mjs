@@ -59,21 +59,61 @@ async function frameStats(browser, files) {
     return stats;
 }
 
+// Image and audio files in the game's source: the frames can't show them. shots/ is the screenshots the prompts ask for.
+const ASSET = /\.(png|jpe?g|gif|webp|avif|bmp|ico|svg|mp3|wav|ogg|oga|m4a|aac|flac|opus|webm|mp4)$/i;
+const assets = (dir, rel = '') => fs.readdirSync(path.join(dir, rel), { withFileTypes: true }).flatMap((e) => {
+    const f = path.join(rel, e.name);
+    if (e.isDirectory()) return ['node_modules', 'dist', '.git'].includes(e.name) || f === 'shots' ? [] : assets(dir, f);
+    return ASSET.test(e.name) ? [f] : [];
+});
+
 async function playSteps(browser, url, steps, outDir) {
     const page = await browser.newPage({ viewport: { width: W, height: H } });
-    // Headless Chromium refuses pointer lock: stub it so every game sees a locked pointer after the first click.
     await page.addInitScript(() => {
+        // Headless Chromium refuses pointer lock: stub it so every game sees a locked pointer after the first click.
         let locked = null;
         const change = () => setTimeout(() => document.dispatchEvent(new Event('pointerlockchange')));
         Object.defineProperty(Document.prototype, 'pointerLockElement', { get: () => locked, configurable: true });
         Element.prototype.requestPointerLock = function () { locked = this; change(); return Promise.resolve(); };
         Document.prototype.exitPointerLock = function () { locked = null; change(); };
+        // The frames can't carry sound: tap whatever reaches a context's speakers with an analyser, read at each shot.
+        const taps = new Map(), connect = AudioNode.prototype.connect;
+        AudioNode.prototype.connect = function (to, ...rest) {
+            if (to instanceof AudioDestinationNode) {
+                let a = taps.get(this.context);
+                if (!a) {
+                    a = Object.assign(this.context.createAnalyser(), { fftSize: 4096, smoothingTimeConstant: 0 });
+                    const mute = this.context.createGain();
+                    mute.gain.value = 0;
+                    connect.call(a, mute); connect.call(mute, to); // pulled, but silent
+                    taps.set(this.context, a);
+                }
+                connect.call(this, a);
+            }
+            return connect.call(this, to, ...rest);
+        };
+        // The loudest context's level (dBFS), its peak frequency and its spectral centroid (Hz).
+        window.__shipAudio = () => {
+            let best = null;
+            for (const [ctx, a] of taps) {
+                const t = new Float32Array(a.fftSize), f = new Float32Array(a.frequencyBinCount);
+                a.getFloatTimeDomainData(t); a.getFloatFrequencyData(f);
+                const rms = Math.sqrt(t.reduce((s, x) => s + x * x, 0) / t.length), hz = ctx.sampleRate / a.fftSize;
+                if (!(rms > 1e-4) || (best && rms <= best.rms)) continue;
+                const p = f.map((db) => 10 ** (db / 10)), sum = p.reduce((s, x) => s + x, 0);
+                best = { rms, db: Math.round(20 * Math.log10(rms)), peak_hz: Math.round(p.indexOf(Math.max(...p)) * hz),
+                    centroid_hz: Math.round(p.reduce((s, x, i) => s + x * i * hz, 0) / sum), state: ctx.state };
+            }
+            if (!best) return { db: null, contexts: [...taps.keys()].map((c) => c.state) };
+            const { rms, ...out } = best;
+            return out;
+        };
     });
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
     await page.goto(url, { waitUntil: 'load', timeout: 60_000 });
-    const files = [];
+    const files = [], sounds = [];
     for (const s of steps) {
         if (s.wait) await page.waitForTimeout(s.wait);
         if (s.start) {
@@ -101,12 +141,13 @@ async function playSteps(browser, url, steps, outDir) {
         }
         if (s.shot) {
             const f = path.join(outDir, `${String(files.length + 1).padStart(2, '0')}-${s.shot}.jpg`);
+            sounds.push(await page.evaluate(() => window.__shipAudio()));
             await page.screenshot({ path: f, type: 'jpeg', quality: 80 });
             files.push(f);
         }
     }
     await page.close();
-    return { files, errors };
+    return { files, sounds, errors };
 }
 
 export async function playCheck(runDir, { steps = JSON.parse(fs.readFileSync(path.join(HERE, 'steps.json'), 'utf8')), out = 'play' } = {}) {
@@ -129,14 +170,15 @@ export async function playCheck(runDir, { steps = JSON.parse(fs.readFileSync(pat
     }
     const { chromium } = await import('playwright'); // only once there is a game to play: CI runs the tests without it
     const server = await serve(web);
-    const browser = await chromium.launch({ headless: true, args: ['--ignore-gpu-blocklist', '--enable-webgl', '--use-angle=metal'] });
+    const browser = await chromium.launch({ headless: true, args: ['--ignore-gpu-blocklist', '--enable-webgl', '--use-angle=metal', '--autoplay-policy=no-user-gesture-required'] });
     try {
-        const { files, errors } = await playSteps(browser, `http://127.0.0.1:${server.address().port}/`, steps, outDir);
+        const { files, sounds, errors } = await playSteps(browser, `http://127.0.0.1:${server.address().port}/`, steps, outDir);
         const stats = await frameStats(browser, files);
-        const frames = files.map((f, i) => ({ file: path.relative(runDir, f), ...stats[i] }));
+        const frames = files.map((f, i) => ({ file: path.relative(runDir, f), ...stats[i], audio: sounds[i] }));
+        r.assets = assets(game);
         if (extra) {
-            fs.writeFileSync(path.join(outDir, 'frames.json'), JSON.stringify({ steps, errors, frames }, null, 2) + '\n');
-            return { frames, errors };
+            fs.writeFileSync(path.join(outDir, 'frames.json'), JSON.stringify({ steps, errors, assets: r.assets, frames }, null, 2) + '\n');
+            return { frames, errors, assets: r.assets };
         }
         const start = frames.findIndex((f) => f.file.includes('-start'));
         Object.assign(r, {

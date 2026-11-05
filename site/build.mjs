@@ -2,7 +2,7 @@
 // every run's frames, checklist and a playable copy of the game. `node site/build.mjs [out dir]` (default _site).
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, scoreSubmission, subdirs } from '../harness/score.mjs';
+import { ROOT, scoreSubmission, subdirs, visualMax } from '../harness/score.mjs';
 import { submissions } from '../harness/validate.mjs';
 import { CSS, esc, ktok, mean, mmss, page as ui } from '../harness/ui.mjs';
 
@@ -33,9 +33,10 @@ const thumb = (s) => {
 const rowsFor = (list) => list.sort((a, b) => b.score - a.score).map((s, i) => `<tr><td>${i + 1}</td>
 <td><a href="${s.href}">${esc(s.sub.model.name)}</a><div class="muted">${esc(s.sub.model.quant ?? '')} · ${esc(s.sub.engine.name)} · ${esc(s.sub.agent.name)} · ${esc(s.sub.rig.machine)}</div></td>
 <td>${thumb(s)}</td><td class="score">${s.score}</td><td>${mean(s.runs.map((r) => r.checklist)).toFixed(1)}/10</td>
+<td>${visualMax(s.def) ? `${mean(s.runs.map((r) => r.visual)).toFixed(1)}/${visualMax(s.def)}` : '–'}</td>
 <td>${s.runs.filter((r) => r.shipped).length}/${s.runs.length}</td><td>${mean(s.runs.map((r) => r.avg_gib)).toFixed(1)}</td>
 <td>${mmss(mean(s.runs.map((r) => r.minutes)))}</td><td>${ktok(mean(s.runs.map((r) => r.tokens_out + r.tokens_uncached_in)))}</td></tr>`).join('');
-const table = (list) => `<table><tr><th>#</th><th>Model</th><th></th><th>Score</th><th>Checklist</th><th>Shipped</th><th>Avg GiB</th><th>Time</th><th>Tokens</th></tr>${rowsFor(list)}</table>`;
+const table = (list) => `<table><tr><th>#</th><th>Model</th><th></th><th>Score</th><th>Checklist</th><th>Visuals</th><th>Shipped</th><th>Avg GiB</th><th>Time</th><th>Tokens</th></tr>${rowsFor(list)}</table>`;
 
 const boards = prompts.map((p) => {
     const mine = subs.filter((s) => s.key === p.key), official = mine.filter((s) => s.area === 'results'), previews = mine.filter((s) => s.area === 'previews');
@@ -47,7 +48,8 @@ ${previews.length ? `<h3>Previews <span class="muted">(fewer than 3 runs, not ra
 
 fs.writeFileSync(path.join(OUT, 'index.html'), page('Ship Score', `<h1>Ship Score</h1>
 <p class="sub">Give a model one real job: build a game from a pinned prompt with an agent, on your machine. The score is what the game got
-right (a checklist judged from screenshots) per unit of what finishing cost: <code>1,000 × checklist ÷ (√avg GiB × minutes × M tokens)</code>.
+right (a checklist and a visual rubric, judged from screenshots) per unit of what finishing cost:
+<code>1,000 × (checklist × visuals)² ÷ (√avg GiB × minutes × M tokens)</code>, squared so quality weighs more than cost (a balance still being tuned).
 Scores compare only runs of the same prompt on the same machine class. Play every game from its page.</p>
 <p><a href="${REPO}">Run it and submit</a> · <a href="${REPO}/blob/main/AGENTS.md">AGENTS.md</a> · <a href="https://mlxserve.com/blog/ship-score/">Why this eval</a></p>
 ${boards}`, 0));
@@ -64,14 +66,20 @@ for (const s of subs) {
             const ev = (j?.evidence ?? []).map((e) => `<a href="${r.dir}/${esc(e)}">${esc(path.basename(e))}</a>`).join(' ');
             return `<tr><td>${j?.pass ? '<span class="ok">yes</span>' : '<span class="no">no</span>'}</td><td>${esc(i.text)}</td><td>${i.points}</td><td>${ev}</td></tr>`;
         }).join('');
+        const visual = (s.def.visual ?? []).map((d) => {
+            const j = judged.visual?.find((x) => x.id === d.id);
+            const ev = (j?.evidence ?? []).map((e) => `<a href="${r.dir}/${esc(e)}">${esc(path.basename(e))}</a>`).join(' ');
+            return `<tr><td>${j?.level ?? 0}/3</td><td>${esc(d.text)}: ${esc(d.levels[j?.level ?? 0])}</td><td>${ev}</td></tr>`;
+        }).join('');
         const frames = (play.frames ?? []).map((f) => `<figure><a href="${r.dir}/${f.file}"><img src="${r.dir}/${f.file}" loading="lazy" alt=""></a>
 <figcaption>${esc(path.basename(f.file, '.jpg'))}</figcaption></figure>`).join('');
         const playLink = fs.existsSync(path.join(rd, 'web', 'index.html')) ? ` · <a href="${r.dir}/web/">play this game</a>` : '';
-        return `<h2>${r.dir}: ${r.shipped ? `checklist ${r.checklist}/10` : '<span class="fail">FAILED</span>'}</h2>
+        return `<h2>${r.dir}: ${r.shipped ? `checklist ${r.checklist}/10${r.visual === null ? '' : ` · visuals ${r.visual}/${visualMax(s.def)}`}` : '<span class="fail">FAILED</span>'}</h2>
 <p class="muted">${r.avg_gib} GiB · ${mmss(r.minutes)} · ${r.tokens_out.toLocaleString()} tokens out / ${r.tokens_uncached_in.toLocaleString()} uncached in
 · ${r.tool_calls} tool calls (${r.tool_errors} errors) · play check ${play.pass ? 'passed' : 'failed'}${playLink}
 · <a href="${REPO}/tree/main/${path.relative(ROOT, rd)}/game">source</a></p>
-<table><tr><th></th><th>Checklist item</th><th>Points</th><th>Evidence</th></tr>${items}</table><div class="frames">${frames}</div>`;
+<table><tr><th></th><th>Checklist item</th><th>Points</th><th>Evidence</th></tr>${items}</table>
+${visual ? `<table><tr><th>Level</th><th>Visual rubric</th><th>Evidence</th></tr>${visual}</table>` : ''}<div class="frames">${frames}</div>`;
     }).join('');
     const m = s.sub;
     fs.writeFileSync(path.join(out, 'index.html'), page(`${m.model.name}: Ship Score`, `<nav><a href="../../../../">← Ship Score</a></nav>

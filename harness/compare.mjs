@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { ROOT, passed, scoreSubmission, total } from './score.mjs';
+import { ROOT, passed, scoreSubmission, total, visualMax } from './score.mjs';
 import { CSS, esc, ktok, mean, mmss, page } from './ui.mjs';
 
 // The dark categorical palette, in its fixed order; a ninth engine folds into gray.
@@ -18,12 +18,14 @@ const now = () => { const d = new Date(); return new Date(d - d.getTimezoneOffse
 const num = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 
 const METRICS = [
-    { title: 'Ship Score', note: '1,000 × checklists ÷ costs, higher is better', wide: true, total: (s) => s.score, run: (r) => total([r]), fmt: num },
     { title: 'Checklist', note: 'points of 10, higher is better', run: (r) => r.checklist, fmt: (v) => `${num(v)}/10` },
-    { title: 'Memory', note: 'average GiB, lower is better', run: (r) => r.avg_gib, fmt: num },
     { title: 'Time', note: "prompt to the agent's last message, lower is better", run: (r) => r.minutes, fmt: mmss },
+    { title: 'Output speed', note: 'tokens written per second the engine spent answering, higher is better', run: (r) => r.tok_s,
+        fmt: (v) => `${num(v)} tok/s` },
+    { title: 'Memory', note: 'average GiB, lower is better', run: (r) => r.avg_gib, fmt: num },
     { title: 'Tokens', note: 'written plus uncached prompt, lower is better', run: (r) => r.tokens_out + r.tokens_uncached_in, fmt: ktok },
     { title: 'Tool calls', note: 'errors in the table, lower is better', run: (r) => r.tool_calls, fmt: (v) => String(Math.round(v)) },
+    { title: 'Ship Score', note: 'still being tuned, higher is better', total: (s) => s.score, run: (r) => total([r]), fmt: num },
 ];
 
 const why = (run, play) => (run.capped ? 'hit the 90-minute cap' : !play.build ? 'npm run build failed' : !play.done ? 'no DONE.md'
@@ -41,7 +43,7 @@ const CMP_CSS = `.wrap{max-width:1400px}.kicker{color:var(--muted);font-size:13p
 .badge b{font-size:22px;color:var(--text);margin-left:5px;letter-spacing:0}.meta{padding:12px 14px 14px;font-size:14px}
 .meta .name{font-weight:700;font-size:15px}.meta ul{margin:6px 0 0;padding-left:18px;color:var(--text2);font-size:13px}
 .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}.panel{background:var(--card);border-radius:12px;padding:16px 18px}
-.panel.wide{grid-column:1/-1}.panel h3{margin:0 0 12px}.panel h3 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:8px}
+.panel h3{margin:0 0 12px}.panel h3 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:8px}
 .rows{display:grid;grid-template-columns:max-content 1fr;gap:8px 12px;align-items:center;font-size:14px}.lbl{color:var(--text2);text-align:right}
 .track{position:relative;height:16px;margin-right:90px}.bar{position:absolute;left:0;top:0;bottom:0;min-width:2px;border-radius:0 4px 4px 0}
 .tick{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;border-radius:1px;background:var(--text)}
@@ -55,6 +57,9 @@ export function compare(dirs, out) {
     const engines = [...new Set(subs.map((s) => s.sub.engine.name))].sort();
     const rigs = [...new Set(subs.map((s) => s.sub.rig.machine))];
     const names = subs.map((s) => [s.sub.model.name, s.sub.model.quant].filter(Boolean).join(' '));
+    const vmax = visualMax(subs[0].def); // one prompt, one rubric
+    const metrics = vmax ? [METRICS[0], { title: 'Visuals', note: `points of ${vmax} on the rubric, higher is better`, run: (r) => r.visual,
+        fmt: (v) => `${num(v)}/${vmax}` }, ...METRICS.slice(1)] : METRICS;
     fs.mkdirSync(path.join(out, 'frames'), { recursive: true });
 
     subs.forEach((s, i) => {
@@ -79,40 +84,49 @@ export function compare(dirs, out) {
             fs.copyFileSync(path.join(s.dir, best.dir, f.file), path.join(out, s.frame));
         }
     });
-    subs.sort((a, b) => b.score - a.score);
+    // Quality first (checklist x visuals): it orders the sheet, the Ship Score only breaks ties.
+    subs.forEach((s) => {
+        s.checklist = mean(s.runs.map((r) => r.checklist));
+        s.visual = vmax ? mean(s.runs.map((r) => r.visual)) : null;
+    });
+    subs.sort((a, b) => mean(b.runs.map((r) => r.quality)) - mean(a.runs.map((r) => r.quality)) || b.score - a.score);
 
     const card = (s) => `<div class="card"><div class="shot">${s.frame ? `<img src="${s.frame}" alt="">` : ''}
-<span class="badge">SHIP <b>${s.shipped ? num(s.score) : 'FAIL'}</b></span></div><div class="meta">
+<span class="badge">CHECKLIST <b>${s.shipped ? `${num(s.checklist)}/10` : 'FAIL'}</b></span></div><div class="meta">
 <div class="name"><i class="dot" style="background:${s.color}"></i>${esc(s.label)}</div>
 <div class="muted">${esc(s.sub.engine.name)} ${esc(s.sub.engine.version)} · ${esc(s.sub.agent.name)}${rigs.length > 1 ? ` · ${esc(s.sub.rig.machine)}` : ''}
 · ${s.shipped}/${s.runs.length} shipped</div>
-${s.shipped ? `<div>Checklist ${num(mean(s.runs.map((r) => r.checklist)))}/10</div>
+${s.shipped ? `<div>${vmax ? `Visuals ${num(s.visual)}/${vmax} · ` : ''}Ship Score ${num(s.score)}</div>
 <ul>${s.missed.length ? s.missed.map((m) => `<li>Missed: ${esc(m)}</li>`).join('') : '<li>Every item</li>'}</ul>` : '<ul><li>Did not ship</li></ul>'}</div></div>`;
 
-    // A total (the Ship Score) is not a mean of its runs, so only the other bars get run ticks.
+    // A total (the Ship Score) is not a mean of its runs, so only the other bars get run ticks. A measure some run's
+    // log does not record (null) shows n/a, with no bar.
     const panel = (m) => {
-        const vals = subs.map((s) => ({ s, v: m.total ? m.total(s) : mean(s.runs.map(m.run)), runs: s.runs.map(m.run) }))
-            .map((x) => ({ ...x, ticks: m.total || x.runs.length < 2 ? [] : x.runs }));
-        const max = Math.max(...vals.flatMap((x) => [x.v, ...x.ticks])) || 1;
+        const vals = subs.map((s) => ({ s, runs: s.runs.map(m.run) }))
+            .map((x) => ({ ...x, v: m.total ? m.total(x.s) : x.runs.every((v) => v !== null) ? mean(x.runs) : null }))
+            .map((x) => ({ ...x, ticks: m.total || x.v === null || x.runs.length < 2 ? [] : x.runs }));
+        const max = Math.max(...vals.flatMap((x) => [x.v ?? 0, ...x.ticks])) || 1;
         const pct = (v) => ((100 * v) / max).toFixed(2);
         const rows = vals.map(({ s, v, runs, ticks }) => {
-            const label = m.total && !s.shipped ? 'FAIL' : m.fmt(v);
-            const tip = `${s.label}: ${label}${runs.length > 1 ? ` (${s.runs.map((r, i) => `${r.dir} ${m.fmt(runs[i])}`).join(', ')})` : ''}`;
+            const label = m.total && !s.shipped ? 'FAIL' : v === null ? 'n/a' : m.fmt(v);
+            const tip = `${s.label}: ${label}${runs.length > 1 && v !== null ? ` (${s.runs.map((r, i) => `${r.dir} ${m.fmt(runs[i])}`).join(', ')})` : ''}`;
             return `<div class="lbl">${esc(s.label)}</div><div class="track" title="${esc(tip)}">
-<i class="bar" style="width:${pct(v)}%;background:${s.color}"></i>${ticks.map((x) => `<i class="tick" style="left:${pct(x)}%"></i>`).join('')}
-<span class="val" style="left:calc(${pct(Math.max(v, ...ticks))}% + 10px)">${label}</span></div>`;
+${v === null ? '' : `<i class="bar" style="width:${pct(v)}%;background:${s.color}"></i>`}${ticks.map((x) => `<i class="tick" style="left:${pct(x)}%"></i>`).join('')}
+<span class="val" style="left:calc(${pct(Math.max(v ?? 0, ...ticks))}% + 10px)">${label}</span></div>`;
         }).join('');
-        return `<div class="panel${m.wide ? ' wide' : ''}"><h3>${m.title}<span>${esc(m.note)}</span></h3><div class="rows">${rows}</div></div>`;
+        return `<div class="panel"><h3>${m.title}<span>${esc(m.note)}</span></h3><div class="rows">${rows}</div></div>`;
     };
 
     const avg = (s, f) => mean(s.runs.map(f));
-    const table = `<table><tr><th>Submission</th><th>Engine · agent</th><th>Ship Score</th><th>Shipped</th><th>Checklist</th><th>Avg GiB</th>
-<th>Time</th><th>Tokens out</th><th>Uncached in</th><th>Tool calls (errors)</th></tr>${subs.map((s) => `<tr>
+    const table = `<table><tr><th>Submission</th><th>Engine · agent</th><th>Shipped</th><th>Checklist</th>${vmax ? '<th>Visuals</th>' : ''}<th>Avg GiB</th>
+<th>Time</th><th>Tok/s</th><th>Tokens out</th><th>Uncached in</th><th>Tool calls (errors)</th><th>Ship Score</th></tr>${subs.map((s) => `<tr>
 <td><i class="dot" style="background:${s.color}"></i>${esc(s.label)}</td><td>${esc(s.sub.engine.name)} · ${esc(s.sub.agent.name)}</td>
-<td class="score">${s.shipped ? num(s.score) : '<span class="fail">FAIL</span>'}</td><td>${s.shipped}/${s.runs.length}</td>
-<td>${num(avg(s, (r) => r.checklist))}/10</td><td>${num(avg(s, (r) => r.avg_gib))}</td><td>${mmss(avg(s, (r) => r.minutes))}</td>
+<td>${s.shipped}/${s.runs.length}</td>
+<td class="score">${num(s.checklist)}/10</td>${vmax ? `<td class="score">${num(s.visual)}/${vmax}</td>` : ''}<td>${num(avg(s, (r) => r.avg_gib))}</td><td>${mmss(avg(s, (r) => r.minutes))}</td>
+<td>${s.runs.every((r) => r.tok_s !== null) ? num(avg(s, (r) => r.tok_s)) : 'n/a'}</td>
 <td>${Math.round(avg(s, (r) => r.tokens_out)).toLocaleString()}</td><td>${Math.round(avg(s, (r) => r.tokens_uncached_in)).toLocaleString()}</td>
-<td>${Math.round(avg(s, (r) => r.tool_calls))} (${Math.round(avg(s, (r) => r.tool_errors))})</td></tr>`).join('')}</table>`;
+<td>${Math.round(avg(s, (r) => r.tool_calls))} (${Math.round(avg(s, (r) => r.tool_errors))})</td>
+<td>${s.shipped ? num(s.score) : '<span class="fail">FAIL</span>'}</td></tr>`).join('')}</table>`;
 
     const { prompt, version } = subs[0].sub;
     const notes = [
@@ -123,12 +137,15 @@ ${s.shipped ? `<div>Checklist ${num(mean(s.runs.map((r) => r.checklist)))}/10</d
     const html = page(`${prompt} ${version}: Ship Score comparison`, `<p class="kicker">Ship Score · ${esc(rigs.join(' / '))} · ${date}</p>
 <h1>${esc(prompt)} ${esc(version)}: ${subs.length} submission${subs.length > 1 ? 's' : ''}</h1>
 <p class="sub">Each submission built the same game from the pinned prompt through an agent, with a 90-minute cap.
-<code>score = 1,000 × checklist ÷ (√avg GiB × minutes × M tokens)</code>, tokens being written plus uncached prompt tokens.
-A run ships when <code>npm run build</code> passes, DONE.md exists and the play check passes; a failed run scores 0 and still pays its cost.</p>
+A run ships when <code>npm run build</code> passes, DONE.md exists and the play check passes; a failed run scores 0 and still pays its cost.
+Read the checklist (what the game got right) and the visuals (how good it looks, on a 0 to 3 rubric per dimension), both judged
+from screenshots, and the measures first: the sheet is ordered by checklist × visuals.</p>
+<p class="sub">The Ship Score, <code>1,000 × (checklist × visuals)² ÷ (√avg GiB × minutes × M tokens)</code>, is not the result to read: its
+weighting of quality against cost is still being tuned and will change as we find the balance, so its numbers move between versions.</p>
 ${rigs.length > 1 ? `<div class="warn">These submissions ran on different machines (${esc(rigs.join(', '))}): their scores do not compare.</div>` : ''}
 ${engines.length > 1 ? `<div class="legend">${engines.map((e) => `<span><i class="dot" style="background:${SERIES[engines.indexOf(e)] ?? OTHER}"></i>${esc(e)}</span>`).join('')}</div>` : ''}
 <div class="cards">${subs.map(card).join('')}</div>
-<div class="panels">${METRICS.map(panel).join('')}</div>${table}
+<div class="panels">${metrics.map(panel).join('')}</div>${table}
 ${notes.length ? `<ul class="notes">${notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}`, `<style>${CSS}\n${CMP_CSS}</style>`);
     const file = path.join(out, 'compare.html');
     fs.writeFileSync(file, html);

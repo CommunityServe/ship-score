@@ -4,8 +4,11 @@
 an agent, on your own machine) and score what it got right per unit of what finishing cost.
 
 ```
-score = 1,000 × checklist ÷ (√avg GiB × minutes × M tokens)
+score = 1,000 × (checklist × visuals)² ÷ (√avg GiB × minutes × M tokens)
 ```
+
+Quality (what works × how good it looks) is squared so it weighs more than cost. That balance is still being tuned and
+may change.
 
 Benchmarks die: every model eventually aces them. Memory, time and tokens never max out, and a harder prompt is always
 one file away. Why and how: [the Ship Score post](https://mlxserve.com/blog/ship-score/).
@@ -36,27 +39,32 @@ checklist from screenshots, and how to open the PR. Claude Code reads it through
 | [`linked-doorways`](prompts/linked-doorways/v1/prompt.txt) | 5/5 | A first-person puzzle game of linked doorways |
 
 Each prompt ends with a **Must have** list; its scored version (1 to 3 points per item, 10 in all) is the prompt's
-`checklist.json`. A published prompt never changes: a new version is a new folder, and scores only compare runs of
+`checklist.json`. It can add a **visual rubric**: dimensions such as art direction, models, surfaces, lighting, scene and
+UI, each judged 0 to 3 against described levels and reference frames, so a polished game outscores a plain one that
+also works. A published prompt never changes: a new version is a new folder, and scores only compare runs of
 the same prompt version.
 
 ## How a result is judged
 
 - **Ships or fails.** Inside 90 minutes, `npm run build` passes, `DONE.md` exists and the play check passes (no page
   errors, not blank, reacts to input). A failed run scores 0 and still pays its cost.
-- **Checklist.** An LLM judge (never the model under test) decides each Must have item from screenshots of the game:
-  the scripted play check's frames plus any extra steps it plays. An item counts only with a screenshot that shows it.
+- **Checklist.** An LLM judge (never the model under test) decides each item from screenshots of the game: the
+  scripted play check's frames plus any extra steps it plays. Sound and asset files come from what the play check
+  records. An item counts only with evidence that shows it working, not just present.
+- **Visuals.** Where the prompt has a rubric, the judge gives each dimension a level from 0 to 3, set against the
+  prompt's reference frames and citing frames of the game.
 - **Cost.** The engine's memory footprint (square root: it matters, but less than getting the game right), the
   minutes, and the tokens written plus uncached prompt tokens.
-- **Three runs.** 1,000 × the checklists added ÷ the costs added. One lucky run can't carry a model that fails twice.
+- **Three runs.** 1,000 × the squared qualities added ÷ the costs added. One lucky run can't carry a model that fails twice.
   Fewer than 3 runs is a preview: shown, not ranked.
 - **Scored per machine.** Compare rows on the same class of machine.
 
 ## Comparing models
 
 Ran several models (or quants, engines, agents) on the same prompt? `node harness/compare.mjs <submission>...` puts
-them on one sheet: a card per submission with its game, bars for the score, checklist, memory, time, tokens and tool
-calls, and the table. It writes `compare/<prompt>-v1_<date>_<time>/compare.html` and `compare.png` and opens the page.
-Add `results/<prompt>/v1/*` to see yours beside the leaderboard.
+them on one sheet: a card per submission with its game, bars for the checklist, visuals, time, output speed, memory,
+tokens, tool calls and the score, and the table. It writes `compare/<prompt>-v1_<date>_<time>/compare.html` and
+`compare.png` and opens the page. Add `results/<prompt>/v1/*` to see yours beside the leaderboard.
 
 ## Submitting
 
@@ -83,7 +91,7 @@ rebuilds. Anyone can play a submitted game and challenge a verdict in an issue.
 
 | Path | What |
 |---|---|
-| `prompts/<name>/v1/` | `prompt.txt` (the exact bytes) and `checklist.json` (items, points, sha256) |
+| `prompts/<name>/v1/` | `prompt.txt` (the exact bytes), `checklist.json` (items, points, visual rubric, sha256), `refs/` (the rubric's reference frames) |
 | `harness/run.mjs` | One run: folder, memory sampler, the agent with the cap, the session log, the play check |
 | `harness/play.mjs` | The play check, and extra judge steps (`--steps`) |
 | `harness/sessions.mjs` | Session-log parsers, one per agent harness: add yours here |

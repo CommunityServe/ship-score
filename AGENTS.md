@@ -27,8 +27,13 @@ prepare the submission. Never write, fix or hint at the game's code. The model u
 ```
 run cost  = √(avg GiB) × minutes × M tokens
 checklist = points of the items the judge passed with evidence ÷ 10   (0 if the run did not ship)
-score     = 1,000 × (checklists added) ÷ (run costs added, failed runs included)
+visuals   = levels the judge gave on the prompt's visual rubric ÷ the rubric's maximum   (1 if the prompt has none)
+quality   = checklist × visuals
+score     = 1,000 × (squared qualities added) ÷ (run costs added, failed runs included)
 ```
+
+Quality is squared because costs spread about 10× between runs: quality has to weigh more than cost. The weighting is
+still being tuned and may change between versions; read the checklist and the visuals first.
 
 - **avg GiB:** the engine process's memory footprint, sampled every 30 s, averaged from the prompt to the agent's last
   message (macOS `phys_footprint`; NVIDIA the process's VRAM plus its RSS). Caches count.
@@ -95,8 +100,21 @@ Read `prompts/<prompt>/v1/checklist.json`. For each item decide **yes or no from
 - When no frame can show an item, play more: write a steps file (same format as `harness/steps.json`: `wait`, `shot`,
   `start`, `press`, `hold` + `ms`, `look: [dx, dy]`, `click: "left" | "right" | [x, y, button]`, `drag: [x1, y1, x2, y2]`)
   and run `node harness/play.mjs <run> --steps extra.json --out play/extra-1`.
-- `pass: true` needs at least one screenshot inside the run that shows it. No evidence, no points.
+- Sound and files can't be seen in a frame, so the play check records them: each frame's `audio` (level in dB, peak and
+  centroid Hz of whatever reaches the speakers) and the game's image and audio files (`assets`, `shots/` excluded), in
+  `play.json` and in each extra run's `frames.json`. A sound item passes when the numbers change with what it should
+  follow (an engine with speed); a no-asset-files item passes when `assets` is empty. Cite that JSON as evidence.
+- `pass: true` needs evidence inside the run that shows it: a screenshot, or the play check's JSON for sound and files.
+  No evidence, no points.
+- **An item works, not just appears.** A lap counter that ticks every few seconds, a speed that ignores the keys, a
+  sound that never changes: visibly broken is a no.
 - Judge every run on the same bar. When unsure, it is a no.
+
+Then, when the checklist has a `visual` rubric, give each dimension a **level from 0 to 3** for how good the game looks:
+its fidelity and its craft, not only whether things are there. Each level is described in the rubric, and `refs` holds
+reference frames (in the prompt's folder) that set the bar for a level: open them before judging and place the game
+against them. Judge the game's best frames, cite the ones that show the level, and when torn between two levels take the
+lower. A level without evidence counts 0.
 
 Write `<run>/checklist.json`:
 
@@ -106,6 +124,9 @@ Write `<run>/checklist.json`:
   "items": [
     { "id": "walk", "pass": true, "evidence": ["play/04-walk.jpg", "play/06-look-right.jpg"], "note": "moves forward, view turns" },
     { "id": "water", "pass": false, "evidence": [], "note": "no water in any frame" }
+  ],
+  "visual": [
+    { "id": "lighting", "level": 3, "evidence": ["game/shots/01-start.png"], "note": "lamps with bloom, headlight pools" }
   ]
 }
 ```
@@ -138,10 +159,10 @@ node harness/validate.mjs <submission>         # what CI runs
 node harness/compare.mjs <submission> <submission> ...    # also results/<prompt>/v1/* to set them beside the leaderboard
 ```
 
-It draws one sheet (a card per submission with its game, bars for the score, checklist, memory, time, tokens and tool
-calls, and the table) into `compare/<prompt>-v1_<date>_<time>/compare.html` plus `compare.png`, and opens it in the
-browser. It refuses submissions of different prompts and warns when the machines differ. `compare/` is never
-submitted.
+It draws one sheet (a card per submission with its game, bars for the checklist, visuals, time, output speed, memory,
+tokens, tool calls and the score, and the table) into `compare/<prompt>-v1_<date>_<time>/compare.html` plus
+`compare.png`, and opens it in the browser. It refuses submissions of different prompts and warns when the machines
+differ. `compare/` is never submitted.
 
 ### 7. Submit (only with the user's OK)
 

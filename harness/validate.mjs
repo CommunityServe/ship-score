@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ROOT, promptDef, scoreSubmission, subdirs } from './score.mjs';
+import { LEVELS, ROOT, promptDef, scoreSubmission, subdirs } from './score.mjs';
 
 const MAX_SUBMISSION = 25 * 2 ** 20, MAX_FILE = 10 * 2 ** 20;
 const NAME = /^\d{4}-\d{2}-\d{2}_[a-z0-9][a-z0-9._-]*$/;
@@ -73,13 +73,22 @@ function checkInto(dir, err, errs) {
         if (!judged) continue;
         if (judged.judge !== sub.judge?.model) err(`${r}: checklist.json judge differs from submission judge.model`);
         if (!Array.isArray(judged.items)) { err(`${r}: checklist.json needs an items list`); continue; }
-        for (const j of judged.items) {
-            if (!def.items.some((i) => i.id === j?.id)) err(`${r}: checklist item "${j?.id}" is not on the ${prompt} ${version} checklist`);
-            if (typeof j?.pass !== 'boolean') err(`${r}: checklist item "${j?.id}" needs pass: true or false`);
+        const evidence = (j) => {
             for (const e of Array.isArray(j?.evidence) ? j.evidence : []) {
                 if (typeof e !== 'string' || path.isAbsolute(e) || e.split(/[\\/]/).includes('..')) err(`${r}: evidence "${e}" must be a path inside the run`);
                 else if (!fs.existsSync(path.join(rd, e))) err(`${r}: evidence "${e}" does not exist`);
             }
+        };
+        for (const j of judged.items) {
+            if (!def.items.some((i) => i.id === j?.id)) err(`${r}: checklist item "${j?.id}" is not on the ${prompt} ${version} checklist`);
+            if (typeof j?.pass !== 'boolean') err(`${r}: checklist item "${j?.id}" needs pass: true or false`);
+            evidence(j);
+        }
+        if (judged.visual !== undefined && !Array.isArray(judged.visual)) { err(`${r}: checklist.json visual must be a list`); continue; }
+        for (const j of judged.visual ?? []) {
+            if (!def.visual?.some((d) => d.id === j?.id)) err(`${r}: visual "${j?.id}" is not on the ${prompt} ${version} rubric`);
+            if (!Number.isInteger(j?.level) || j.level < 0 || j.level > LEVELS) err(`${r}: visual "${j?.id}" needs a level from 0 to ${LEVELS}`);
+            evidence(j);
         }
     }
     const files = walk(dir);

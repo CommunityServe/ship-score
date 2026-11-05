@@ -14,7 +14,7 @@ import zlib from 'node:zlib';
 import { sampler } from './memory.mjs';
 import { playCheck } from './play.mjs';
 import { CAP_MIN, promptDef } from './score.mjs';
-import { parsers } from './sessions.mjs';
+import { parsers, stripImages } from './sessions.mjs';
 
 const argv = process.argv.slice(2), sep = argv.indexOf('--');
 const flags = sep < 0 ? argv : argv.slice(0, sep), cmd = sep < 0 ? [] : argv.slice(sep + 1);
@@ -66,7 +66,7 @@ killGroup('SIGKILL');
 // The game first: a missing session log must not lose it.
 fs.cpSync(game, path.join(runDir, 'game'), { recursive: true, verbatimSymlinks: true }); // npm's .bin links are relative
 const session = parsers[agent].locate(game, started);
-if (session) fs.writeFileSync(path.join(runDir, 'session.jsonl.gz'), zlib.gzipSync(scrub(fs.readFileSync(session, 'utf8'))));
+if (session) fs.writeFileSync(path.join(runDir, 'session.jsonl.gz'), zlib.gzipSync(stripImages(scrub(fs.readFileSync(session, 'utf8')))));
 fs.rmSync(work, { recursive: true, force: true, maxRetries: 5 }); // the unscrubbed session goes with it (retries: Finder drops .DS_Store mid-delete)
 fs.writeFileSync(path.join(runDir, 'run.json'), JSON.stringify({
     prompt: name, version, agent, command: cmd.map((a) => scrub(a.replaceAll('{prompt_text}', '<prompt.txt>'))),

@@ -15,14 +15,28 @@ const newest = (dir, sinceMs) => {
     return files[0] ?? null;
 };
 
-// Every parser returns { prompt, start, end, out, uncached, cached, calls, errors }: start = the prompt's timestamp,
-// end = the last assistant message, uncached = prompt tokens the engine had to prefill (cache hits excluded).
+// Image payloads (an agent reading its own screenshots) out of a session log, which would otherwise outgrow the
+// 10 MB file limit: pi's {type: "image", data} and Claude Code's {type: "base64", data} keep their size, not their bytes.
+export function stripImages(s) {
+    const walk = (v) => {
+        if (Array.isArray(v)) return v.map(walk);
+        if (!v || typeof v !== 'object') return v;
+        if ((v.type === 'image' || v.type === 'base64') && typeof v.data === 'string')
+            return { ...v, data: `<${v.data.length} bytes of base64 stripped>` };
+        return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, walk(x)]));
+    };
+    return s.split('\n').map((l) => { try { return JSON.stringify(walk(JSON.parse(l))); } catch { return l; } }).join('\n');
+}
+
+// Every parser returns { prompt, start, end, out, uncached, cached, calls, errors, gen_ms }: start = the prompt's
+// timestamp, end = the last assistant message, uncached = prompt tokens the engine had to prefill (cache hits excluded),
+// gen_ms = the time the engine spent answering, prefill included (null when the log does not record it).
 export const parsers = {
     pi: {
         // pi writes into the --session-dir the run passes it: <run>/sessions.
         locate: (gameDir, sinceMs) => newest(path.join(gameDir, '..', 'sessions'), sinceMs),
         parse(s) {
-            const r = { prompt: null, start: null, end: null, out: 0, uncached: 0, cached: 0, calls: 0, errors: 0 };
+            const r = { prompt: null, start: null, end: null, out: 0, uncached: 0, cached: 0, calls: 0, errors: 0, gen_ms: null };
             for (const o of lines(s)) {
                 if (o.type !== 'message') continue;
                 const m = o.message;
@@ -33,6 +47,7 @@ export const parsers = {
                     r.uncached += m.usage.input + (m.usage.cacheWrite ?? 0);
                     r.cached += m.usage.cacheRead ?? 0;
                     r.calls += m.content.filter((c) => c.type === 'toolCall').length;
+                    if (m.durationMs !== undefined) r.gen_ms = (r.gen_ms ?? 0) + m.durationMs;
                 }
                 if (m.role === 'toolResult' && m.isError) r.errors++;
             }
@@ -44,7 +59,8 @@ export const parsers = {
         locate: (gameDir, sinceMs) =>
             newest(path.join(os.homedir(), '.claude', 'projects', path.resolve(gameDir).replace(/[/.]/g, '-')), sinceMs),
         parse(s) {
-            const r = { prompt: null, start: null, end: null, out: 0, uncached: 0, cached: 0, calls: 0, errors: 0 };
+            // Claude Code's log has no generation time per message: gen_ms stays null.
+            const r = { prompt: null, start: null, end: null, out: 0, uncached: 0, cached: 0, calls: 0, errors: 0, gen_ms: null };
             const seen = new Set();
             for (const o of lines(s)) {
                 if (o.isSidechain) continue;

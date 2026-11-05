@@ -5,8 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import zlib from 'node:zlib';
-import { avgGib, promptDef, scoreSubmission, total } from '../score.mjs';
-import { parsers } from '../sessions.mjs';
+import { LEVELS, ROOT, avgGib, promptDef, scoreSubmission, subdirs, total, visualPoints } from '../score.mjs';
+import { parsers, stripImages } from '../sessions.mjs';
 import { check, submissions } from '../validate.mjs';
 import { tree } from '../memory.mjs';
 import { compare } from '../compare.mjs';
@@ -18,15 +18,26 @@ const piLog = (prompt, end) => [
     { type: 'session', timestamp: new Date(T0).toISOString() },
     { type: 'message', message: { role: 'user', content: [{ type: 'text', text: prompt }], timestamp: T0 } },
     { type: 'message', message: { role: 'assistant', timestamp: T0 + MIN, content: [{ type: 'toolCall' }, { type: 'toolCall' }],
-        usage: { input: 2000, output: 30000, cacheRead: 100000, cacheWrite: 0 } } },
+        usage: { input: 2000, output: 30000, cacheRead: 100000, cacheWrite: 0 }, durationMs: 400_000 } },
     { type: 'message', message: { role: 'toolResult', isError: true, timestamp: T0 + MIN } },
     { type: 'message', message: { role: 'assistant', timestamp: end, content: [{ type: 'text', text: 'done' }],
-        usage: { input: 8000, output: 60000, cacheRead: 900000, cacheWrite: 0 } } },
+        usage: { input: 8000, output: 60000, cacheRead: 900000, cacheWrite: 0 }, durationMs: 800_000 } },
 ].map((o) => JSON.stringify(o)).join('\n');
+
+test('stripImages drops image bytes and keeps what the parsers count', () => {
+    const pi = JSON.stringify({ type: 'message', message: { role: 'toolResult', content: [{ type: 'image', data: 'A'.repeat(5000), mimeType: 'image/png' }] } });
+    const cc = JSON.stringify({ message: { role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: 'image/png', data: 'B'.repeat(5000) } }] } });
+    const usage = JSON.stringify({ type: 'message', message: { role: 'assistant', usage: { input: 7, output: 3 } } });
+    const out = stripImages([pi, cc, usage, 'not json'].join('\n'));
+    assert.ok(out.length < 1000);
+    assert.match(out, /<5000 bytes of base64 stripped>/);
+    assert.equal(out.split('\n')[2], usage);
+    assert.equal(out.split('\n')[3], 'not json');
+});
 
 test('pi parser counts output, uncached input, calls and errors', () => {
     const r = parsers.pi.parse(piLog(def.text, T0 + 10 * MIN));
-    assert.deepEqual(r, { prompt: def.text, start: T0, end: T0 + 10 * MIN, out: 90000, uncached: 10000, cached: 1000000, calls: 2, errors: 1 });
+    assert.deepEqual(r, { prompt: def.text, start: T0, end: T0 + 10 * MIN, out: 90000, uncached: 10000, cached: 1000000, calls: 2, errors: 1, gen_ms: 1_200_000 });
 });
 
 test('claude-code parser counts a message split over several lines once', () => {
@@ -39,7 +50,7 @@ test('claude-code parser counts a message split over several lines once', () => 
         { type: 'assistant', isSidechain: true, timestamp: new Date(T0 + 3 * MIN).toISOString(), message: { id: 'x', usage, content: [] } },
     ].map((o) => JSON.stringify(o)).join('\n');
     const r = parsers['claude-code'].parse(log);
-    assert.deepEqual(r, { prompt: def.text, start: T0, end: T0 + MIN, out: 700, uncached: 1000, cached: 5000, calls: 1, errors: 1 });
+    assert.deepEqual(r, { prompt: def.text, start: T0, end: T0 + MIN, out: 700, uncached: 1000, cached: 5000, calls: 1, errors: 1, gen_ms: null });
 });
 
 test('memory averages only the samples inside the run', () => {
@@ -47,9 +58,30 @@ test('memory averages only the samples inside the run', () => {
     assert.equal(avgGib(`${T0 - 1} ${100 * g}\n${T0} ${10 * g}\n${T0 + 5} ${30 * g}\n${T0 + 99} ${100 * g}\n`, T0, T0 + 10), 20);
 });
 
-test('three runs score 1,000 x checklists / costs, a failed run paying its cost', () => {
-    assert.equal(total([{ checklist: 10, cost: 20 }]), 50);
-    assert.equal(total([{ checklist: 10, cost: 20 }, { checklist: 8, cost: 20 }, { checklist: 0, cost: 20 }]), 30);
+test('three runs score 1,000 x squared qualities / costs, a failed run paying its cost', () => {
+    assert.equal(total([{ quality: 1, cost: 20 }]), 50);
+    assert.equal(total([{ quality: 1, cost: 20 }, { quality: 0.8, cost: 20 }, { quality: 0, cost: 20 }]), 27.3);
+});
+
+test('a visual level counts only when it is 0 to 3 with evidence in the run', () => {
+    const rd = fs.mkdtempSync(path.join(os.tmpdir(), 'ship-score-'));
+    fs.writeFileSync(path.join(rd, 'shot.jpg'), 'x');
+    const rubric = { visual: ['a', 'b', 'c', 'd'].map((id) => ({ id })) };
+    assert.equal(visualPoints(rubric, { visual: [
+        { id: 'a', level: 3, evidence: ['shot.jpg'] }, { id: 'b', level: 2, evidence: [] },
+        { id: 'c', level: 9, evidence: ['shot.jpg'] }, { id: 'd', level: 1, evidence: ['missing.jpg'] },
+    ] }, rd), 3);
+});
+
+test('every prompt\'s checklist adds to 10 and its visual rubric is well formed, with reference frames that exist', () => {
+    for (const p of subdirs(path.join(ROOT, 'prompts'))) for (const v of subdirs(path.join(ROOT, 'prompts', p))) {
+        const d = promptDef(p, v);
+        assert.equal(d.items.reduce((a, i) => a + i.points, 0), 10, `${p} ${v}`);
+        for (const r of d.visual ?? []) {
+            assert.equal(r.levels.length, LEVELS + 1, `${p} ${r.id}`);
+            for (const f of Object.values(r.refs ?? {})) assert.ok(fs.existsSync(path.join(ROOT, 'prompts', p, v, f)), `${p} ${r.id} ${f}`);
+        }
+    }
 });
 
 // A submission whose runs all took 40 minutes in 25 GiB with 100k tokens: cost 20 each.
@@ -79,11 +111,11 @@ function makeSubmission(root, { area = 'results', runs = 3, prompt = def.text, j
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'ship-score-'));
 
-test('a full checklist minus water in 25 GiB, 40 minutes and 100k tokens scores 45', () => {
+test('a full checklist minus water in 25 GiB, 40 minutes and 100k tokens scores 40.5', () => {
     const { runs, score } = scoreSubmission(makeSubmission(tmp()));
     assert.equal(runs[0].checklist, 9);
     assert.equal(runs[0].cost, 20);
-    assert.equal(score, 45);
+    assert.equal(score, 40.5);
 });
 
 test('the validator passes a correct submission and recomputes every number', () => {

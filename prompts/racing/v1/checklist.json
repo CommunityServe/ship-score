@@ -17,7 +17,7 @@
     {
       "id": "opponents",
       "points": 2,
-      "text": "Opponent cars or a lap timer"
+      "text": "Opponent cars that race, or a lap timer and lap count that count correctly"
     },
     {
       "id": "speedometer",
@@ -33,6 +33,96 @@
       "id": "no-asset-files",
       "points": 1,
       "text": "No image or audio files in the project"
+    }
+  ],
+  "visual": [
+    {
+      "id": "art",
+      "text": "Art direction",
+      "levels": [
+        "default colors, no intent",
+        "a theme",
+        "one palette used consistently",
+        "reads as a designed game, with a mood"
+      ],
+      "refs": {
+        "2": "refs/night-circuit.jpg",
+        "3": "refs/neon-ridge.jpg"
+      }
+    },
+    {
+      "id": "models",
+      "text": "Cars and props",
+      "levels": [
+        "boxes and primitives",
+        "recognizable outlines",
+        "wheels, windows, lights, livery",
+        "detailed, varied models"
+      ],
+      "refs": {
+        "0": "refs/night-circuit.jpg",
+        "1": "refs/neon-rush.jpg",
+        "2": "refs/neon-ridge.jpg"
+      }
+    },
+    {
+      "id": "surfaces",
+      "text": "Surfaces and textures",
+      "levels": [
+        "flat colors",
+        "one texture",
+        "textured road, ground and buildings",
+        "layered detail: markings, curbs, wear, variety"
+      ],
+      "refs": {
+        "1": "refs/night-circuit.jpg",
+        "2": "refs/neon-rush.jpg",
+        "3": "refs/neon-ridge.jpg"
+      }
+    },
+    {
+      "id": "lighting",
+      "text": "Lighting and atmosphere",
+      "levels": [
+        "flat or unlit",
+        "sky gradient or fog",
+        "light sources that light the scene",
+        "bloom, glow, shadows, a time-of-day mood"
+      ],
+      "refs": {
+        "1": "refs/neon-rush.jpg",
+        "2": "refs/neon-ridge.jpg",
+        "3": "refs/nightshift.jpg"
+      }
+    },
+    {
+      "id": "scene",
+      "text": "Scene",
+      "levels": [
+        "void",
+        "sparse props",
+        "scenery along the whole track",
+        "dense, varied set dressing and landmarks"
+      ],
+      "refs": {
+        "1": "refs/night-circuit.jpg",
+        "2": "refs/neon-rush.jpg",
+        "3": "refs/neon-ridge.jpg"
+      }
+    },
+    {
+      "id": "ui",
+      "text": "UI",
+      "levels": [
+        "plain text",
+        "readable panels",
+        "a consistent styled HUD",
+        "designed instruments and race overlays"
+      ],
+      "refs": {
+        "1": "refs/neon-rush.jpg",
+        "3": "refs/nightshift.jpg"
+      }
     }
   ]
 }

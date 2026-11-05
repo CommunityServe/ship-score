@@ -28,11 +28,21 @@ export const avgGib = (memText, start, end) => {
     return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length / 2 ** 30 : null;
 };
 
+const cited = (j, runDir) => j?.evidence?.length && j.evidence.every((e) => fs.existsSync(path.join(runDir, e)));
+
 // The checklist items a run earns: the judge passed them AND cited evidence that exists in the run.
 export const passed = (def, judged, runDir) => def.items.filter((item) => {
     const j = judged.items.find((x) => x.id === item.id);
-    return j?.pass && j.evidence?.length && j.evidence.every((e) => fs.existsSync(path.join(runDir, e)));
+    return j?.pass && cited(j, runDir);
 });
+
+// The visual rubric: each dimension judged 0 to 3, a level counting only with evidence that exists in the run.
+export const LEVELS = 3;
+export const visualMax = (def) => (def.visual?.length ?? 0) * LEVELS;
+export const visualPoints = (def, judged, runDir) => (def.visual ?? []).reduce((a, d) => {
+    const j = judged.visual?.find((x) => x.id === d.id);
+    return a + (Number.isInteger(j?.level) && j.level >= 0 && j.level <= LEVELS && cited(j, runDir) ? j.level : 0);
+}, 0);
 
 export function scoreRun(runDir, def) {
     const run = json(path.join(runDir, 'run.json'));
@@ -41,19 +51,25 @@ export function scoreRun(runDir, def) {
     const minutes = Math.min((s.end - s.start) / 60000, CAP_MIN);
     const gib = avgGib(fs.readFileSync(path.join(runDir, 'mem.txt'), 'utf8'), s.start, s.end);
     const shipped = !run.capped && play.pass && fs.existsSync(path.join(runDir, 'game', 'DONE.md'));
-    const pts = shipped ? passed(def, json(path.join(runDir, 'checklist.json')), runDir).reduce((a, i) => a + i.points, 0) : 0;
+    const judged = json(path.join(runDir, 'checklist.json'));
+    const pts = shipped ? passed(def, judged, runDir).reduce((a, i) => a + i.points, 0) : 0;
+    // A prompt without a visual rubric scores on its checklist alone.
+    const visual = !def.visual ? null : shipped ? visualPoints(def, judged, runDir) : 0;
     const mtok = (s.out + s.uncached) / 1e6;
     return {
-        dir: path.basename(runDir), shipped, checklist: pts, avg_gib: gib === null ? null : round(gib, 2), minutes: round(minutes, 2),
+        dir: path.basename(runDir), shipped, checklist: pts, visual, quality: round((pts / 10) * (visual === null ? 1 : visual / visualMax(def)), 4),
+        avg_gib: gib === null ? null : round(gib, 2), minutes: round(minutes, 2),
         tokens_out: s.out, tokens_uncached_in: s.uncached, tokens_cached_in: s.cached, tool_calls: s.calls, tool_errors: s.errors,
+        tok_s: s.gen_ms ? round(s.out / (s.gen_ms / 1000), 1) : null, // display only, not scored
         cost: gib === null ? 0 : round(Math.sqrt(gib) * minutes * mtok, 4), prompt_matches: s.prompt?.trim() === def.text.trim(),
     };
 }
 
-// 1,000 x the checklists added (a failed run adds 0) / the costs added (failed runs included).
+// 1,000 x the squared qualities added (a failed run adds 0) / the costs added (failed runs included), a run's quality
+// being its checklist x its visuals. Squared: costs spread 10x between runs, so quality must weigh more than cost.
 export const total = (runs) => {
     const cost = runs.reduce((a, r) => a + r.cost, 0);
-    return cost ? round((1000 * runs.reduce((a, r) => a + r.checklist / 10, 0)) / cost, 1) : 0;
+    return cost ? round((1000 * runs.reduce((a, r) => a + r.quality ** 2, 0)) / cost, 1) : 0;
 };
 
 export function scoreSubmission(dir) {
@@ -67,7 +83,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const dir = path.resolve(process.argv[2] ?? '.');
     const { sub, runs, score } = scoreSubmission(dir);
     for (const r of runs) {
-        console.log(`${r.dir}  ${r.shipped ? 'shipped' : 'FAILED '}  checklist ${r.checklist}/10  ${r.avg_gib} GiB  ${mmss(r.minutes)}`
+        console.log(`${r.dir}  ${r.shipped ? 'shipped' : 'FAILED '}  checklist ${r.checklist}/10${r.visual === null ? '' : `  visuals ${r.visual}`}  ${r.avg_gib} GiB  ${mmss(r.minutes)}`
             + `  ${r.tokens_out.toLocaleString()} out / ${r.tokens_uncached_in.toLocaleString()} uncached in  ${r.tool_calls} (${r.tool_errors}) calls`
             + `${r.prompt_matches ? '' : '  PROMPT MISMATCH'}`);
     }
