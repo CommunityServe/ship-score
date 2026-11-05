@@ -1,0 +1,48 @@
+{
+  "prompt": "raycaster",
+  "version": "v1",
+  "difficulty": 2,
+  "sha256": "5c3cf17c1aab20b30bd27a979d62da566e0473bae614105dbfb3da500b74d83f",
+  "items": [
+    {
+      "id": "walk",
+      "points": 2,
+      "text": "Walk with WASD and turn with the mouse, without passing through walls"
+    },
+    {
+      "id": "straight-walls",
+      "points": 2,
+      "text": "Walls are straight: no fisheye bulge on a flat wall"
+    },
+    {
+      "id": "textures",
+      "points": 1,
+      "text": "At least three different wall textures"
+    },
+    {
+      "id": "shading",
+      "points": 1,
+      "text": "Walls facing different ways are shaded differently, and farther walls are darker"
+    },
+    {
+      "id": "floor-ceiling",
+      "points": 1,
+      "text": "The floor and ceiling are textured"
+    },
+    {
+      "id": "sprite-occlusion",
+      "points": 1,
+      "text": "Sprites are hidden by walls in front of them"
+    },
+    {
+      "id": "door",
+      "points": 1,
+      "text": "Space opens a door"
+    },
+    {
+      "id": "shoot",
+      "points": 1,
+      "text": "Left click fires, and an enemy that is hit reacts"
+    }
+  ]
+}

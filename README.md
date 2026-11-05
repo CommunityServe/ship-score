@@ -27,6 +27,7 @@ checklist from screenshots, and how to open the PR. Claude Code reads it through
 | Prompt | Difficulty | What it asks for |
 |---|---|---|
 | [`voxel-sandbox`](prompts/voxel-sandbox/v1/prompt.txt) | 2/5 | A first-person block world: walk, break, place, hotbar |
+| [`raycaster`](prompts/raycaster/v1/prompt.txt) | 2/5 | An early-90s style raycaster shooter on a plain 2D canvas: textured walls, doors, sprites |
 | [`kings-landing`](prompts/kings-landing/v1/prompt.txt) | 3/5 | A city that builds itself like origami, then a first-person walk |
 | [`racing`](prompts/racing/v1/prompt.txt) | 3/5 | A car racing game with generated textures and audio |
 | [`subway-fps`](prompts/subway-fps/v1/prompt.txt) | 4/5 | A subway-station shooter with waves and a train between stations |
@@ -49,6 +50,13 @@ the same prompt version.
 - **Three runs.** 1,000 × the checklists added ÷ the costs added. One lucky run can't carry a model that fails twice.
   Fewer than 3 runs is a preview: shown, not ranked.
 - **Scored per machine.** Compare rows on the same class of machine.
+
+## Comparing models
+
+Ran several models (or quants, engines, agents) on the same prompt? `node harness/compare.mjs <submission>...` puts
+them on one sheet: a card per submission with its game, bars for the score, checklist, memory, time, tokens and tool
+calls, and the table. It writes `compare/<prompt>-v1_<date>_<time>/compare.html` and `compare.png` and opens the page.
+Add `results/<prompt>/v1/*` to see yours beside the leaderboard.
 
 ## Submitting
 
@@ -80,6 +88,7 @@ rebuilds. Anyone can play a submitted game and challenge a verdict in an issue.
 | `harness/play.mjs` | The play check, and extra judge steps (`--steps`) |
 | `harness/sessions.mjs` | Session-log parsers, one per agent harness: add yours here |
 | `harness/score.mjs`, `validate.mjs` | The score and the CI checks, both from raw files |
+| `harness/compare.mjs` | A comparison sheet of several submissions of one prompt, opened in the browser |
 | `site/build.mjs` | The GitHub Pages leaderboard |
 
 Tests: `node --test harness/test/harness.test.mjs`. Adding an agent harness is one `parsers` entry in `harness/sessions.mjs` with a test.

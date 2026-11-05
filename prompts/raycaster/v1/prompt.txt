@@ -1,0 +1,22 @@
+Build a first-person raycaster shooter in the style of early-90s PC shooters for the browser, drawn on a plain 2D canvas (no WebGL, no three.js), in the current directory.
+
+The world: a grid map of at least 24x24 cells defined in code, with rooms, corridors and sliding doors, rendered column by column with DDA raycasting. Walls carry 64x64 pixel textures drawn in code (at least brick, stone and wood), with fisheye correction, walls facing north/south darker than walls facing east/west, and darker shading with distance. The floor and ceiling are textured too (per-pixel floor casting), not flat colours. Barrels, pillars and enemies are billboard sprites drawn in code, sorted back to front and clipped by a per-column depth buffer so walls in front hide them. Enemies walk toward the player when they see them; left click fires the gun drawn at the bottom of the screen with a muzzle flash, an enemy that is hit flashes, and three hits kill it (it falls and stays down). A minimap in a corner shows the walls, the player and the view cone, and a HUD shows health and ammo. Render at an internal resolution of at least 320x200, scaled to fill the window with crisp pixels.
+
+The spawn: the player faces a closed door 4 cells ahead, with a barrel partly hidden behind a wall edge in view, and walks about 3 cells per second. Space opens the door in front of the player within 2 cells; behind it is a room with an enemy.
+
+Must have (checked by playing the game):
+- Walk with WASD and turn with the mouse, without passing through walls
+- Walls are straight: no fisheye bulge on a flat wall
+- At least three different wall textures
+- Walls facing different ways are shaded differently, and farther walls are darker
+- The floor and ceiling are textured
+- Sprites are hidden by walls in front of them
+- Space opens a door
+- Left click fires, and an enemy that is hit reacts
+
+Setup and rules:
+- Use Vite, plain JavaScript modules, no runtime dependencies.
+- Controls: WASD to move and strafe, mouse to turn (pointer lock on click), left click to fire, space to open doors, with an on-screen controls hint and a crosshair.
+- Write tools/shot.mjs with Playwright (Chromium) that loads the built game, waits for it to render and saves screenshots to shots/ (the spawn view and two other views). Look at the screenshots yourself and fix whatever looks wrong.
+- `npm run build` must pass. Write README.md (what it is, controls) and DONE.md (what you built, what you checked, what you would improve next).
+- Work autonomously to the end; do not stop to ask questions. If something fails, fix it and keep going.

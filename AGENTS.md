@@ -117,7 +117,18 @@ node harness/score.mjs <submission> --write    # fills runs[] and score
 node harness/validate.mjs <submission>         # what CI runs
 ```
 
-### 6. Submit (only with the user's OK)
+### 6. Compare (when the user scored more than one submission of the prompt)
+
+```
+node harness/compare.mjs <submission> <submission> ...    # also results/<prompt>/v1/* to set them beside the leaderboard
+```
+
+It draws one sheet (a card per submission with its game, bars for the score, checklist, memory, time, tokens and tool
+calls, and the table) into `compare/<prompt>-v1_<date>_<time>/compare.html` plus `compare.png`, and opens it in the
+browser. It refuses submissions of different prompts and warns when the machines differ. `compare/` is never
+submitted.
+
+### 7. Submit (only with the user's OK)
 
 Show the user the score table, the folder's size and what the session logs contain (they hold the system prompt and
 the whole conversation). With their OK: fork the repo, branch, commit **only the submission folder**, and open a PR

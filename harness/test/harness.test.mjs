@@ -8,6 +8,7 @@ import zlib from 'node:zlib';
 import { avgGib, promptDef, scoreSubmission, total } from '../score.mjs';
 import { parsers } from '../sessions.mjs';
 import { check } from '../validate.mjs';
+import { compare } from '../compare.mjs';
 
 const def = promptDef('voxel-sandbox', 'v1');
 const T0 = Date.parse('2026-11-05T10:00:00Z'), MIN = 60_000;
@@ -51,8 +52,8 @@ test('three runs score 1,000 x checklists / costs, a failed run paying its cost'
 });
 
 // A submission whose runs all took 40 minutes in 25 GiB with 100k tokens: cost 20 each.
-function makeSubmission(root, { area = 'results', runs = 3, prompt = def.text, judge = 'judge-model' } = {}) {
-    const dir = path.join(root, area, 'voxel-sandbox', 'v1', '2026-11-05_test-rig_test-model_test-engine_pi');
+function makeSubmission(root, { area = 'results', runs = 3, prompt = def.text, judge = 'judge-model', model = 'm', engine = 'e' } = {}) {
+    const dir = path.join(root, area, 'voxel-sandbox', 'v1', `2026-11-05_test-rig_${model}_${engine}_pi`);
     for (let n = 1; n <= runs; n++) {
         const rd = path.join(dir, `run-${n}`);
         fs.mkdirSync(path.join(rd, 'game'), { recursive: true });
@@ -63,12 +64,12 @@ function makeSubmission(root, { area = 'results', runs = 3, prompt = def.text, j
         fs.writeFileSync(path.join(rd, 'session.jsonl.gz'), zlib.gzipSync(log));
         fs.writeFileSync(path.join(rd, 'mem.txt'), `${T0} ${25 * 2 ** 30}\n${T0 + 40 * MIN} ${25 * 2 ** 30}\n`);
         fs.writeFileSync(path.join(rd, 'run.json'), JSON.stringify({ agent: 'pi', capped: false }));
-        fs.writeFileSync(path.join(rd, 'play.json'), JSON.stringify({ build: true, done: true, pass: true }));
+        fs.writeFileSync(path.join(rd, 'play.json'), JSON.stringify({ build: true, done: true, pass: true, frames: [{ file: 'play/04-walk.jpg' }] }));
         fs.writeFileSync(path.join(rd, 'checklist.json'), JSON.stringify({ judge, items: def.items.map((i) => ({
             id: i.id, pass: i.id !== 'water', evidence: i.id === 'water' ? [] : ['play/04-walk.jpg'] })) }));
     }
-    const sub = { prompt: 'voxel-sandbox', version: 'v1', rig: { machine: 'Test rig' }, engine: { name: 'e', version: '1' },
-        model: { name: 'm' }, agent: { name: 'pi' }, inputs: 'text', judge: { model: 'judge-model' } };
+    const sub = { prompt: 'voxel-sandbox', version: 'v1', rig: { machine: 'Test rig' }, engine: { name: engine, version: '1' },
+        model: { name: model }, agent: { name: 'pi' }, inputs: 'text', judge: { model: 'judge-model' } };
     fs.writeFileSync(path.join(dir, 'submission.json'), JSON.stringify(sub));
     const { runs: got, score } = scoreSubmission(dir);
     fs.writeFileSync(path.join(dir, 'submission.json'), JSON.stringify({ ...sub, runs: got, score }));
@@ -99,4 +100,16 @@ test('the validator refuses a wrong prompt, a short official result and missing 
     const dir = makeSubmission(tmp());
     fs.rmSync(path.join(dir, 'run-2', 'play', '04-walk.jpg'));
     assert.match(check(dir).join('\n'), /evidence "play\/04-walk.jpg" does not exist/);
+});
+
+test('the comparison draws every submission of one prompt, marks a failed run and refuses mixed prompts', () => {
+    const root = tmp(), out = path.join(root, 'compare');
+    const a = makeSubmission(root, { model: 'alpha', engine: 'e1' }), b = makeSubmission(root, { model: 'beta', engine: 'e2' });
+    fs.writeFileSync(path.join(b, 'run-2', 'run.json'), JSON.stringify({ agent: 'pi', capped: true }));
+    const html = fs.readFileSync(compare([a, b], out), 'utf8');
+    for (const s of ['alpha', 'beta', 'Missed: Water is visible', 'beta run-2: hit the 90-minute cap', 'class="legend"']) assert.ok(html.includes(s), s);
+    assert.ok(fs.existsSync(path.join(out, 'frames', '1.jpg')));
+    const sub = JSON.parse(fs.readFileSync(path.join(b, 'submission.json')));
+    fs.writeFileSync(path.join(b, 'submission.json'), JSON.stringify({ ...sub, prompt: 'racing' }));
+    assert.throws(() => compare([a, b], out), /same prompt/);
 });

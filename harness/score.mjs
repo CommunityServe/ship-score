@@ -5,6 +5,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { parsers } from './sessions.mjs';
+import { mmss } from './ui.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const CAP_MIN = 90;
@@ -25,12 +26,11 @@ export const avgGib = (memText, start, end) => {
     return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length / 2 ** 30 : null;
 };
 
-// Checklist points: an item counts only when the judge passed it AND cited evidence that exists in the run.
-export const points = (def, judged, runDir) => def.items.reduce((sum, item) => {
+// The checklist items a run earns: the judge passed them AND cited evidence that exists in the run.
+export const passed = (def, judged, runDir) => def.items.filter((item) => {
     const j = judged.items.find((x) => x.id === item.id);
-    const proven = j?.pass && j.evidence?.length && j.evidence.every((e) => fs.existsSync(path.join(runDir, e)));
-    return sum + (proven ? item.points : 0);
-}, 0);
+    return j?.pass && j.evidence?.length && j.evidence.every((e) => fs.existsSync(path.join(runDir, e)));
+});
 
 export function scoreRun(runDir, def) {
     const run = json(path.join(runDir, 'run.json'));
@@ -39,7 +39,7 @@ export function scoreRun(runDir, def) {
     const minutes = Math.min((s.end - s.start) / 60000, CAP_MIN);
     const gib = avgGib(fs.readFileSync(path.join(runDir, 'mem.txt'), 'utf8'), s.start, s.end);
     const shipped = !run.capped && play.pass && fs.existsSync(path.join(runDir, 'game', 'DONE.md'));
-    const pts = shipped ? points(def, json(path.join(runDir, 'checklist.json')), runDir) : 0;
+    const pts = shipped ? passed(def, json(path.join(runDir, 'checklist.json')), runDir).reduce((a, i) => a + i.points, 0) : 0;
     const mtok = (s.out + s.uncached) / 1e6;
     return {
         dir: path.basename(runDir), shipped, checklist: pts, avg_gib: round(gib, 2), minutes: round(minutes, 2),
@@ -60,8 +60,6 @@ export function scoreSubmission(dir) {
     const runs = fs.readdirSync(dir).filter((d) => /^run-\d+$/.test(d)).sort().map((d) => scoreRun(path.join(dir, d), def));
     return { sub, def, runs, score: total(runs) };
 }
-
-const mmss = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const dir = path.resolve(process.argv[2] ?? '.');
